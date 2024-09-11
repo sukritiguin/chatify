@@ -25,8 +25,16 @@ export const SignInCard = ({ setState }: signInCardProps) => {
 
   const { signIn } = useAuthActions();
 
-  const handleProviderSignin = (value: "github" | "google") => {
-    signIn(value);
+  const handleProviderSignin = async (value: "github" | "google") => {
+    console.log(`Signing in with ${value}`);
+    try{
+      const temp = await signIn(value);
+      console.log(temp);
+    }catch(err){
+      console.log({'err': err});
+    }finally{
+      console.log("Hello Finally!!!!");
+    }
   };
 
   return (
