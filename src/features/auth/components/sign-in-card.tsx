@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import { TriangleAlert } from "lucide-react";
 import { signInFlow } from "../types";
 import { useState } from "react";
 
@@ -22,11 +23,26 @@ interface signInCardProps {
 export const SignInCard = ({ setState }: signInCardProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
 
   const { signIn } = useAuthActions();
 
-  const handleProviderSignin = (value: "github" | "google") => {
-    signIn(value);
+  const handleProviderSignin = async (value: "github" | "google") => {
+    console.log("Signing in with " + value);
+    await signIn(value);
+  };
+
+  const onPasswordSignin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending(true);
+    signIn("password", { email, password, flow: "signIn" })
+      .catch(() => {
+        setError("Invalid login credentials!");
+      })
+      .finally(() => {
+        setPending(false);
+      });
   };
 
   return (
@@ -37,15 +53,20 @@ export const SignInCard = ({ setState }: signInCardProps) => {
           Use your email or another service to continue
         </CardDescription>
       </CardHeader>
+      {!!error && (
+        <div className="bg-destructive/15 p-3 rounded-md my-2 text-red-500 flex items-center">
+          {" "}
+          <TriangleAlert className="size-4" />
+          <p className="px-2">Error</p>
+        </div>
+      )}
       <CardContent className="px-0 space-y-5 pb-0">
         <form
-          onClick={(e) => {
-            e.preventDefault();
-          }}
+          onSubmit={onPasswordSignin}
           className="space-y-2 5"
         >
           <Input
-            disabled={false}
+            disabled={pending}
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
@@ -55,7 +76,7 @@ export const SignInCard = ({ setState }: signInCardProps) => {
             required
           />
           <Input
-            disabled={false}
+            disabled={pending}
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
@@ -71,7 +92,7 @@ export const SignInCard = ({ setState }: signInCardProps) => {
         <Separator />
         <div className="flex flex-col gap-y-2.5">
           <Button
-            disabled={false}
+            disabled={pending}
             onClick={() => {
               handleProviderSignin("google");
             }}
@@ -83,7 +104,7 @@ export const SignInCard = ({ setState }: signInCardProps) => {
             with Google
           </Button>
           <Button
-            disabled={false}
+            disabled={pending}
             onClick={() => {
               handleProviderSignin("github");
             }}
