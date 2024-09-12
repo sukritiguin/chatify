@@ -61,10 +61,7 @@ export const SignInCard = ({ setState }: signInCardProps) => {
         </div>
       )}
       <CardContent className="px-0 space-y-5 pb-0">
-        <form
-          onSubmit={onPasswordSignin}
-          className="space-y-2 5"
-        >
+        <form onSubmit={onPasswordSignin} className="space-y-2 5">
           <Input
             disabled={pending}
             value={email}
@@ -89,6 +86,17 @@ export const SignInCard = ({ setState }: signInCardProps) => {
             Continue
           </Button>
         </form>
+
+        <div className="text-xs text-muted-foreground flex items-end">
+          <span
+            className="text-sky-700 hover:underline cursor-pointer text-right"
+            onClick={() => {
+              setState("reset");
+            }}
+          >
+            Forgot Password?
+          </span>
+        </div>
         <Separator />
         <div className="flex flex-col gap-y-2.5">
           <Button
