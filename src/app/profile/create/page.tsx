@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -31,27 +32,31 @@ import EducationCard from "./components/EducationCard";
 import EducationForm from "./components/EducationForm";
 import ExperienceCard from "./components/ExperienceCard";
 import ExperienceForm from "./components/ExperienceForm";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import {
+  Education,
+  Experience,
+  Profile,
+  Skill,
+} from "../../../../types/profile.interface";
+import { useRouter } from "next/navigation";
 
-interface Education {
-  institute: string;
-  course: string;
-  start: string;
-  end: string;
-  story: string;
-  [key: string]: string; // This allows indexing by string keys
-}
-
-interface Experience {
-  company: string;
-  designation: string;
-  type: string;
-  start: string;
-  end: string;
-  [key: string]: string; // This allows index
-}
+type RemoveEducationType = (index: number) => void;
+type HandleEducationChangeType = (
+  index: number,
+  field: keyof Education,
+  value: string
+) => void;
+type HandleExperienceChangeType = (
+  index: number,
+  field: keyof Experience,
+  value: string
+) => void;
 
 const CreateProfile = () => {
-  const [profile, setProfile] = useState({
+  const router = useRouter(); // Get router instance
+  const [profile, setProfile] = useState<Profile>({
     coverPhoto: "",
     profilePhoto: "",
     bio: "",
@@ -59,9 +64,11 @@ const CreateProfile = () => {
     experiences: [
       { company: "", designation: "", type: "", start: "", end: "" },
     ],
-    skills: [{ skill: "", level: "Beginner" }],
+    skills: [{ skill: "", level: "" }],
     socials: { linkedIn: "", github: "", twitter: "" },
   });
+
+  const insertProfile = useMutation(api.queries.insertProfile);
 
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingProfile, setUploadingProfile] = useState(false);
@@ -105,15 +112,26 @@ const CreateProfile = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Submit the profile with the image URLs
     console.log(profile);
     // Send profile to backend
+    try {
+      // Call the mutation with userId and profileData
+      const newProfileId = await insertProfile({
+        data: profile,
+      });
+
+      console.log("New Profile ID:", newProfileId);
+      router.push("/profile")
+    } catch (error) {
+      console.error("Error inserting profile:", error);
+    }
   };
 
-  const handleEducationChange = (
+  const handleEducationChange: HandleEducationChangeType = (
     index: number,
-    field: string,
+    field: keyof Education,
     value: string
   ) => {
     const updatedEducations: Education[] = [...profile.educations];
@@ -133,13 +151,13 @@ const CreateProfile = () => {
   };
 
   // Update the handleExperienceChange function to set experienceFilled
-  const handleExperienceChange = (
+  const handleExperienceChange: HandleExperienceChangeType = (
     index: number,
-    field: string,
+    field: keyof Experience,
     value: string
   ) => {
     const updatedExperiences: Experience[] = [...profile.experiences];
-    updatedExperiences[index][field] = value;
+    updatedExperiences[index][field] = value as any;
     setProfile((prevProfile) => ({
       ...prevProfile,
       experiences: updatedExperiences,
@@ -165,7 +183,7 @@ const CreateProfile = () => {
     setEducationFilled(false); // Disable the button until new fields are filled
   };
 
-  const removeEducation = (index: number) => {
+  const removeEducation: RemoveEducationType = (index: number) => {
     const updatedEducations = profile.educations.filter((_, i) => i !== index);
     setProfile((prevProfile) => ({
       ...prevProfile,
@@ -495,8 +513,17 @@ const CreateProfile = () => {
                       }}
                     />
                     <Select
-                      onValueChange={(value) => {
-                        const updatedSkills = [...profile.skills];
+                      onValueChange={(
+                        value:
+                          | "Beginner"
+                          | "Intermediate"
+                          | "Advanced"
+                          | "Proficient"
+                          | "Expert"
+                          | "Master"
+                          | ""
+                      ) => {
+                        const updatedSkills: Skill[] = [...profile.skills];
                         updatedSkills[index].level = value;
                         setProfile({
                           ...profile,

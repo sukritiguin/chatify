@@ -1,3 +1,3 @@
-import { getUserProfile } from "./function/profile.function";
+import { getUserProfile, insertProfile } from "./function/profile.function";
 
-export {getUserProfile};
+export {getUserProfile, insertProfile};

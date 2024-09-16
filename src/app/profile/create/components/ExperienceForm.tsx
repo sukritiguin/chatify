@@ -1,9 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ExperienceForm.tsx
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import React from 'react';
-const ExperienceForm = ({ experience, index, handleExperienceChange }: { experience: any, index: any, handleExperienceChange: any }) => {
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import React from "react";
+import { Experience } from "../../../../../types/profile.interface";
+
+const ExperienceForm = ({
+  experience,
+  index,
+  handleExperienceChange,
+}: {
+  experience: Experience;
+  index: number;
+  handleExperienceChange: (
+    index: number,
+    field: keyof Experience,
+    value: string
+  ) => void;
+}) => {
   return (
     <div>
       <Input
@@ -11,7 +31,7 @@ const ExperienceForm = ({ experience, index, handleExperienceChange }: { experie
         placeholder="Company"
         value={experience.company}
         onChange={(e) =>
-          handleExperienceChange(index, 'company', e.target.value)
+          handleExperienceChange(index, "company", e.target.value)
         }
       />
       <Input
@@ -19,12 +39,12 @@ const ExperienceForm = ({ experience, index, handleExperienceChange }: { experie
         placeholder="Designation"
         value={experience.designation}
         onChange={(e) =>
-          handleExperienceChange(index, 'designation', e.target.value)
+          handleExperienceChange(index, "designation", e.target.value)
         }
       />
       <Select
         onValueChange={(value) => {
-          handleExperienceChange(index, 'type', value);
+          handleExperienceChange(index, "type", value);
         }}
         value={experience.type}
       >
@@ -35,8 +55,8 @@ const ExperienceForm = ({ experience, index, handleExperienceChange }: { experie
           <SelectItem value="fulltime">Full Time</SelectItem>
           <SelectItem value="internship">Internship</SelectItem>
           <SelectItem value="apprenticeship">Apprenticeship</SelectItem>
-          <SelectItem value="part time">Part Time</SelectItem>
-          <SelectItem value="WFH">Work From Home (WFH)</SelectItem>
+          <SelectItem value="parttime">Part Time</SelectItem>
+          <SelectItem value="WFH">WFH</SelectItem>
           <SelectItem value="freelance">Freelance</SelectItem>
         </SelectContent>
       </Select>
@@ -47,7 +67,7 @@ const ExperienceForm = ({ experience, index, handleExperienceChange }: { experie
           type="date"
           value={experience.start}
           onChange={(e) =>
-            handleExperienceChange(index, 'start', e.target.value)
+            handleExperienceChange(index, "start", e.target.value)
           }
         />
         <Input
@@ -55,9 +75,7 @@ const ExperienceForm = ({ experience, index, handleExperienceChange }: { experie
           placeholder="End Date"
           type="date"
           value={experience.end}
-          onChange={(e) =>
-            handleExperienceChange(index, 'end', e.target.value)
-          }
+          onChange={(e) => handleExperienceChange(index, "end", e.target.value)}
         />
       </div>
     </div>

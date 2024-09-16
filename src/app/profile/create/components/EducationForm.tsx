@@ -1,8 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Input } from "@/components/ui/input";
+import { Education } from "../../../../../types/profile.interface";
 
-const EducationForm = ({ education, index, handleEducationChange }: {education: any, index: any, handleEducationChange: any}) => {
+const EducationForm = ({
+  education,
+  index,
+  handleEducationChange,
+}: {
+  education: Education;
+  index: number;
+  handleEducationChange: (
+    index: number,
+    field: keyof Education,
+    value: string
+  ) => void;
+}) => {
   return (
     <div className="space-y-4">
       {/* Institute */}

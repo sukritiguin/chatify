@@ -1,19 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FaTrash, FaCalendarAlt, FaUniversity, FaBook } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Education } from "../../../../../types/profile.interface";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const EducationCard = ({
   education,
   index,
   removeEducation,
 }: {
-  education: any;
-  index: any;
-  removeEducation: any;
+  education: Education; // Use the Education interface here
+  index: number; // Assuming index is a number
+  removeEducation: (index: number) => void; // Define removeEducation function type
 }) => {
   return (
     <Card className="mb-6 p-6 shadow-lg rounded-lg bg-gradient-to-r from-green-100 to-green-300 hover:shadow-2xl transition-shadow duration-200 ease-in-out">

@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import React from 'react';
 import { FaTrash, FaCalendarAlt, FaBuilding, FaBriefcase } from 'react-icons/fa';
+import { Experience } from '../../../../../types/profile.interface';
 
-const ExperienceCard = ({ experience, index, removeExperience }: { experience: any, index: any, removeExperience: any }) => {
+const ExperienceCard = ({ experience, index, removeExperience }: { experience: Experience, index: number, removeExperience: (index: number) => void }) => {
   return (
     <Card className="mb-6 p-6 shadow-lg rounded-lg bg-gradient-to-r from-blue-100 to-blue-300 hover:shadow-2xl transition-shadow duration-200 ease-in-out">
       <CardContent className="flex flex-col space-y-4">
