@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { uploadImageToCloudinary } from "@/lib/cloudinary.utility";
@@ -32,7 +32,7 @@ import EducationCard from "./components/EducationCard";
 import EducationForm from "./components/EducationForm";
 import ExperienceCard from "./components/ExperienceCard";
 import ExperienceForm from "./components/ExperienceForm";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import {
   Education,
@@ -41,6 +41,7 @@ import {
   Skill,
 } from "../../../../types/profile.interface";
 import { useRouter } from "next/navigation";
+import Loader from "@/components/ui/Loader";
 
 type RemoveEducationType = (index: number) => void;
 type HandleEducationChangeType = (
@@ -75,6 +76,25 @@ const CreateProfile = () => {
 
   const [educationFilled, setEducationFilled] = useState(false);
   const [experienceFilled, setExperienceFilled] = useState(false);
+
+  const [loading, setLoading] = useState(true); // State to handle loading
+
+  // Fetch user profile with proper typing
+  const userProfile = useQuery(api.queries.getUserProfile);
+
+  useEffect(() => {
+    // Check the profile data after it has been fetched
+    if (userProfile) {
+      router.push("/profile"); // Redirect if profile exists
+    } else {
+      setLoading(false); // Stop loading if there is no profile
+    }
+  }, [userProfile, router]);
+
+  // Show loading spinner or message while fetching profile
+  if (loading) {
+    return <Loader size="large" color="#4A90E2" />;
+  }
 
   const handleFileUpload = async (
     file: File,
@@ -123,7 +143,7 @@ const CreateProfile = () => {
       });
 
       console.log("New Profile ID:", newProfileId);
-      router.push("/profile")
+      router.push("/profile");
     } catch (error) {
       console.error("Error inserting profile:", error);
     }
@@ -134,7 +154,9 @@ const CreateProfile = () => {
     field: keyof Education,
     value: string
   ) => {
-    const updatedEducations: Education[] = [...profile.educations];
+    const updatedEducations: Education[] = profile.educations
+      ? [...profile.educations]
+      : [];
     updatedEducations[index][field] = value;
     setProfile((prevProfile) => ({
       ...prevProfile,
@@ -156,7 +178,9 @@ const CreateProfile = () => {
     field: keyof Experience,
     value: string
   ) => {
-    const updatedExperiences: Experience[] = [...profile.experiences];
+    const updatedExperiences: Experience[] = profile.experiences
+      ? [...profile.experiences]
+      : [];
     updatedExperiences[index][field] = value as any;
     setProfile((prevProfile) => ({
       ...prevProfile,
@@ -176,7 +200,7 @@ const CreateProfile = () => {
     setProfile((prevProfile) => ({
       ...prevProfile,
       educations: [
-        ...prevProfile.educations,
+        ...(prevProfile.educations || []),
         { institute: "", course: "", start: "", end: "", story: "" },
       ],
     }));
@@ -184,43 +208,51 @@ const CreateProfile = () => {
   };
 
   const removeEducation: RemoveEducationType = (index: number) => {
-    const updatedEducations = profile.educations.filter((_, i) => i !== index);
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      educations: updatedEducations,
-    }));
+    if (profile.educations) {
+      const updatedEducations = profile.educations.filter(
+        (_, i) => i !== index
+      );
+      setProfile((prevProfile) => ({
+        ...prevProfile,
+        educations: updatedEducations,
+      }));
+    }
   };
 
   const addExperience = () => {
     setProfile((prevProfile) => ({
       ...prevProfile,
       experiences: [
-        ...prevProfile.experiences,
+        ...(prevProfile.experiences || []),
         { company: "", designation: "", type: "", start: "", end: "" },
       ],
     }));
   };
 
   const removeExperience = (index: number) => {
-    const updatedExperiences = profile.experiences.filter(
-      (_, i) => i !== index
-    );
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      experiences: updatedExperiences,
-    }));
+    if (profile.experiences) {
+      const updatedExperiences = profile.experiences.filter(
+        (_, i) => i !== index
+      );
+      setProfile((prevProfile) => ({
+        ...prevProfile,
+        experiences: updatedExperiences,
+      }));
+    }
   };
 
   const addSkill = () => {
     setProfile((prevProfile) => ({
       ...prevProfile,
-      skills: [...prevProfile.skills, { skill: "", level: "Beginner" }],
+      skills: [...(prevProfile.skills || []), { skill: "", level: "Beginner" }],
     }));
   };
 
   const removeSkill = (index: number) => {
-    const updatedSkills = profile.skills.filter((_, i) => i !== index);
-    setProfile((prevProfile) => ({ ...prevProfile, skills: updatedSkills }));
+    if (profile.skills) {
+      const updatedSkills = profile.skills.filter((_, i) => i !== index);
+      setProfile((prevProfile) => ({ ...prevProfile, skills: updatedSkills }));
+    }
   };
 
   return (
@@ -314,28 +346,30 @@ const CreateProfile = () => {
 
               <div>
                 <Label className="my-2">Your Education</Label>
-                {profile.educations.map((education, index) => (
-                  <div key={index} className="mb-4">
-                    {/* Render as a card if it's a filled education */}
-                    {education.institute &&
-                    education.course &&
-                    education.start &&
-                    education.end ? (
-                      <EducationCard
-                        education={education}
-                        index={index}
-                        removeEducation={removeEducation}
-                      />
-                    ) : (
-                      // Render the form to fill the education details
-                      <EducationForm
-                        education={education}
-                        index={index}
-                        handleEducationChange={handleEducationChange}
-                      />
-                    )}
-                  </div>
-                ))}
+                {profile.educations &&
+                  profile.educations.length > 0 &&
+                  profile.educations.map((education, index) => (
+                    <div key={index} className="mb-4">
+                      {/* Render as a card if it's a filled education */}
+                      {education.institute &&
+                      education.course &&
+                      education.start &&
+                      education.end ? (
+                        <EducationCard
+                          education={education}
+                          index={index}
+                          removeEducation={removeEducation}
+                        />
+                      ) : (
+                        // Render the form to fill the education details
+                        <EducationForm
+                          education={education}
+                          index={index}
+                          handleEducationChange={handleEducationChange}
+                        />
+                      )}
+                    </div>
+                  ))}
                 <Button
                   type="button"
                   className="flex items-center text-blue-600"
@@ -465,28 +499,30 @@ const CreateProfile = () => {
               </div> */}
               <div>
                 <Label className="my-2">Your Experiences</Label>
-                {profile.experiences.map((experience, index) => (
-                  <div key={index} className="mb-4">
-                    {experience.company &&
-                    experience.designation &&
-                    experience.start &&
-                    experience.end ? (
-                      // Render experience as a card if all fields are filled
-                      <ExperienceCard
-                        experience={experience}
-                        index={index}
-                        removeExperience={removeExperience}
-                      />
-                    ) : (
-                      // Render the form to fill the experience details
-                      <ExperienceForm
-                        experience={experience}
-                        index={index}
-                        handleExperienceChange={handleExperienceChange}
-                      />
-                    )}
-                  </div>
-                ))}
+                {profile.experiences &&
+                  profile.experiences.length > 0 &&
+                  profile.experiences.map((experience, index) => (
+                    <div key={index} className="mb-4">
+                      {experience.company &&
+                      experience.designation &&
+                      experience.start &&
+                      experience.end ? (
+                        // Render experience as a card if all fields are filled
+                        <ExperienceCard
+                          experience={experience}
+                          index={index}
+                          removeExperience={removeExperience}
+                        />
+                      ) : (
+                        // Render the form to fill the experience details
+                        <ExperienceForm
+                          experience={experience}
+                          index={index}
+                          handleExperienceChange={handleExperienceChange}
+                        />
+                      )}
+                    </div>
+                  ))}
                 <Button
                   type="button"
                   className="flex items-center text-blue-600"
@@ -501,58 +537,65 @@ const CreateProfile = () => {
               {/* Skills Section */}
               <div>
                 <Label className="my-2">Your Skills</Label>
-                {profile.skills.map((skill, index) => (
-                  <div key={index} className="mb-4 flex items-center space-x-2">
-                    <Input
-                      placeholder="Skill"
-                      value={skill.skill}
-                      onChange={(e) => {
-                        const updatedSkills = [...profile.skills];
-                        updatedSkills[index].skill = e.target.value;
-                        setProfile({ ...profile, skills: updatedSkills });
-                      }}
-                    />
-                    <Select
-                      onValueChange={(
-                        value:
-                          | "Beginner"
-                          | "Intermediate"
-                          | "Advanced"
-                          | "Proficient"
-                          | "Expert"
-                          | "Master"
-                          | ""
-                      ) => {
-                        const updatedSkills: Skill[] = [...profile.skills];
-                        updatedSkills[index].level = value;
-                        setProfile({
-                          ...profile,
-                          skills: updatedSkills,
-                        });
-                      }}
-                      value={skill.level}
+                {profile.skills &&
+                  profile.skills.length > 0 &&
+                  profile.skills.map((skill, index) => (
+                    <div
+                      key={index}
+                      className="mb-4 flex items-center space-x-2"
                     >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select Level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Beginner">Beginner</SelectItem>
-                        <SelectItem value="Intermediate">
-                          Intermediate
-                        </SelectItem>
-                        <SelectItem value="Advanced">Advanced</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <button
-                      type="button"
-                      className="text-red-600"
-                      onClick={() => removeSkill(index)}
-                    >
-                      <FaTrash className="inline-block mr-1" />
-                      Remove
-                    </button>
-                  </div>
-                ))}
+                      <Input
+                        placeholder="Skill"
+                        value={skill.skill}
+                        onChange={(e) => {
+                          const updatedSkills = [...(profile.skills || [])];
+                          updatedSkills[index].skill = e.target.value;
+                          setProfile({ ...profile, skills: updatedSkills });
+                        }}
+                      />
+                      <Select
+                        onValueChange={(
+                          value:
+                            | "Beginner"
+                            | "Intermediate"
+                            | "Advanced"
+                            | "Proficient"
+                            | "Expert"
+                            | "Master"
+                            | ""
+                        ) => {
+                          const updatedSkills: Skill[] = [
+                            ...(profile.skills || []),
+                          ];
+                          updatedSkills[index].level = value;
+                          setProfile({
+                            ...profile,
+                            skills: updatedSkills,
+                          });
+                        }}
+                        value={skill.level}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Beginner">Beginner</SelectItem>
+                          <SelectItem value="Intermediate">
+                            Intermediate
+                          </SelectItem>
+                          <SelectItem value="Advanced">Advanced</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <button
+                        type="button"
+                        className="text-red-600"
+                        onClick={() => removeSkill(index)}
+                      >
+                        <FaTrash className="inline-block mr-1" />
+                        Remove
+                      </button>
+                    </div>
+                  ))}
                 <button
                   type="button"
                   className="flex items-center text-blue-600"
@@ -571,7 +614,9 @@ const CreateProfile = () => {
                   <Input
                     className="my-1"
                     placeholder="LinkedIn"
-                    value={profile.socials.linkedIn}
+                    value={
+                      profile && profile.socials ? profile.socials.linkedIn : ""
+                    }
                     onChange={(e) => {
                       setProfile((prevProfile) => ({
                         ...prevProfile,
@@ -588,7 +633,9 @@ const CreateProfile = () => {
                   <Input
                     className="my-1"
                     placeholder="GitHub"
-                    value={profile.socials.github}
+                    value={
+                      profile && profile.socials ? profile.socials.github : ""
+                    }
                     onChange={(e) => {
                       setProfile((prevProfile) => ({
                         ...prevProfile,
@@ -606,7 +653,9 @@ const CreateProfile = () => {
                   <Input
                     className="my-1"
                     placeholder="Twitter"
-                    value={profile.socials.twitter}
+                    value={
+                      profile && profile.socials ? profile.socials.twitter : ""
+                    }
                     onChange={(e) => {
                       setProfile((prevProfile) => ({
                         ...prevProfile,

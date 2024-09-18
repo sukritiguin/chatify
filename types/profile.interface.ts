@@ -20,7 +20,7 @@ export interface Education {
 export interface Experience {
   company: string;
   designation: string;
-  type?: "fulltime" | "internship" | "apprenticeship" | "part time" | "WFH" | "freelance" | ""; // Use a union type;
+  type?: "fulltime" | "internship" | "apprenticeship" | "parttime" | "WFH" | "freelance" | ""; // Use a union type;
   start: string;
   end?: string;
 }
