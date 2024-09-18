@@ -41,7 +41,7 @@ import {
   Skill,
 } from "../../../../types/profile.interface";
 import { useRouter } from "next/navigation";
-import Loader from "@/components/ui/Loader";
+import Loader from "@/components/ui/Loader"
 
 type RemoveEducationType = (index: number) => void;
 type HandleEducationChangeType = (

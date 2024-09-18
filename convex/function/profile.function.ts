@@ -126,3 +126,37 @@ export const insertProfile = mutation({
     return newProfileId; // Return the new profile ID
   },
 });
+
+
+// Define the mutation to update the profile banner
+export const updateProfileBanner = mutation({
+  args: {
+    coverPhoto: v.string(), // Assuming coverPhoto is the banner field
+  },
+  handler: async (ctx, args) => {
+    const { coverPhoto } = args; // Get the cover photo from the arguments
+    const userId = await getAuthUserId(ctx);
+
+    // Ensure the user is authenticated
+    if (!userId) {
+      return null; // or throw an error
+    }
+
+    // Fetch the user profile
+    const existingProfile = await ctx.db
+      .query("profile")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first();
+
+    if (!existingProfile) {
+      throw new Error("Profile not found."); // Handle case when profile does not exist
+    }
+
+    // Update the profile with the new coverPhoto
+    await ctx.db.patch(existingProfile._id, {
+      coverPhoto: coverPhoto, // Update the cover photo field
+    });
+
+    return existingProfile._id; // Return the profile ID
+  },
+});
