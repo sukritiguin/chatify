@@ -15,6 +15,13 @@ import { Experience } from "../../../../../../types/profile.interface";
 import { useMutation } from "convex/react";
 import { api } from "../../../../../../convex/_generated/api";
 import Loader from "@/components/ui/Loader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function ExperienceUpdate({
   isOpen,
@@ -129,26 +136,29 @@ export function ExperienceUpdate({
             />
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid grid-cols-4 items-center gap-4 w-full">
             <Label htmlFor="type" className="text-right">
               Type
             </Label>
-            <select
-              id="type"
-              className="col-span-3"
+            <Select
               value={type}
-              onChange={(event) => {
-                setType(event.target.value as any); // Cast to any or a valid union type
+              onValueChange={(value) => {
+                setType(value as "" | "fulltime" | "internship" | "apprenticeship" | "parttime" | "WFH" | "freelance");
               }}
+              defaultValue={type}
             >
-              <option value="">Select Type</option>
-              <option value="fulltime">Full Time</option>
-              <option value="internship">Internship</option>
-              <option value="apprenticeship">Apprenticeship</option>
-              <option value="parttime">Part Time</option>
-              <option value="WFH">Work From Home</option>
-              <option value="freelance">Freelance</option>
-            </select>
+              <SelectTrigger id="type" style={{ width: "180px" }}>
+                <SelectValue placeholder="Select Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="fulltime">Full Time</SelectItem>
+                <SelectItem value="internship">Internship</SelectItem>
+                <SelectItem value="apprenticeship">Apprenticeship</SelectItem>
+                <SelectItem value="parttime">Part Time</SelectItem>
+                <SelectItem value="WFH">Work From Home</SelectItem>
+                <SelectItem value="freelance">Freelance</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <DialogFooter>

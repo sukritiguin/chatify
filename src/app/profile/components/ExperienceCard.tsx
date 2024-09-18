@@ -11,6 +11,14 @@ interface Experience {
   start: string;
   end?: string; // Optional
   story?: string; // Optional description of the experience
+  type?:
+    | "fulltime"
+    | "internship"
+    | "apprenticeship"
+    | "parttime"
+    | "WFH"
+    | "freelance"
+    | "";
 }
 
 interface ExperienceCardProps {
@@ -52,6 +60,28 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
               <p className="text-sm text-gray-300">
                 {formatDateRange(exp.start, exp.end)}
               </p>
+              {/* Work Type Display */}
+              {exp.type && (
+                <span
+                  className={`inline-block mt-2 px-2 py-1 text-xs font-semibold text-white rounded-full ${
+                    exp.type === "fulltime"
+                      ? "bg-green-500"
+                      : exp.type === "internship"
+                        ? "bg-blue-500"
+                        : exp.type === "apprenticeship"
+                          ? "bg-yellow-500"
+                          : exp.type === "parttime"
+                            ? "bg-orange-500"
+                            : exp.type === "WFH"
+                              ? "bg-purple-500"
+                              : exp.type === "freelance"
+                                ? "bg-teal-500"
+                                : "bg-gray-500"
+                  }`}
+                >
+                  {exp.type.charAt(0).toUpperCase() + exp.type.slice(1)}
+                </span>
+              )}
               {exp.story && (
                 <p className="mt-2 text-gray-100 italic">{exp.story}</p>
               )}
