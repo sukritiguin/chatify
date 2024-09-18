@@ -66,12 +66,13 @@ const ProfilePage = () => {
 
   console.log(profile);
   const profileData = mapConvexDataToUserProfile(profile);
+  const profileId = profile?._id as string;
   console.log(profileData);
 
   return (
     <>
       {/* <ProfileCard profileData={profileData} /> */}
-      <LinkedInProfileCard profile={profileData}/>
+      <LinkedInProfileCard profile={profileData} profileId={profileId}/>
       {/* <div>Hello from profile</div> */}
     </>
   );

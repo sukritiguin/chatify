@@ -160,3 +160,67 @@ export const updateProfileBanner = mutation({
     return existingProfile._id; // Return the profile ID
   },
 });
+
+
+// Define the mutation to update a single experience
+export const updateExperience = mutation({
+  args: {
+    experienceIndex: v.number(), // Index of the experience to update
+    experienceData: v.object({
+      company: v.string(),
+      designation: v.string(),
+      type: v.optional(
+        v.union(
+          v.literal("fulltime"),
+          v.literal("internship"),
+          v.literal("apprenticeship"),
+          v.literal("parttime"),
+          v.literal("WFH"),
+          v.literal("freelance"),
+          v.literal("")
+        )
+      ),
+      start: v.string(),
+      end: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const { experienceIndex, experienceData } = args;
+    const userId = await getAuthUserId(ctx);
+
+    // Ensure the user is authenticated
+    if (!userId) {
+      return null; // or throw an error
+    }
+
+    // Fetch the user profile
+    const existingProfile = await ctx.db
+      .query("profile")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first();
+
+    if (!existingProfile) {
+      throw new Error("Profile not found."); // Handle case when profile does not exist
+    }
+
+    // Get the current experiences array
+    const currentExperiences = existingProfile.experiences || [];
+
+    // Check if the experienceIndex is valid
+    if (experienceIndex < 0 || experienceIndex >= currentExperiences.length) {
+      throw new Error("Invalid experience index.");
+    }
+
+    // Update the specified experience
+    const updatedExperiences = currentExperiences.map((exp, index) =>
+      index === experienceIndex ? { ...exp, ...experienceData } : exp
+    );
+
+    // Update the profile with the new experiences array
+    await ctx.db.patch(existingProfile._id, {
+      experiences: updatedExperiences,
+    });
+
+    return existingProfile._id; // Return the profile ID
+  },
+});

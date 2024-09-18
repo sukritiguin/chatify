@@ -29,7 +29,13 @@ const formatDateRange = (startDate: string, endDate?: string) => {
   return `${formattedStart} - ${formattedEnd} · ${months} mos`;
 };
 
-export const LinkedInProfileCard = ({ profile }: { profile: Profile }) => {
+export const LinkedInProfileCard = ({
+  profile,
+  profileId,
+}: {
+  profile: Profile;
+  profileId: string;
+}) => {
   const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false);
 
   return (
@@ -55,7 +61,10 @@ export const LinkedInProfileCard = ({ profile }: { profile: Profile }) => {
                 size={24}
               />
             </div>
-            <BannerUpdate isOpen={isBannerDialogOpen} setIsOpen={setIsBannerDialogOpen} />
+            <BannerUpdate
+              isOpen={isBannerDialogOpen}
+              setIsOpen={setIsBannerDialogOpen}
+            />
           </div>
           {/* Profile Photo (absolute positioned) */}
           <div className="flex -mt-12 ml-2 left-8 -bottom-12">
@@ -76,6 +85,7 @@ export const LinkedInProfileCard = ({ profile }: { profile: Profile }) => {
           <ExperienceCard
             experience={profile.experiences}
             formatDateRange={formatDateRange}
+            profileId={profileId}
           />
           <EducationCard
             educations={profile.educations}

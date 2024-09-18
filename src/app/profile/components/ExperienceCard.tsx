@@ -1,7 +1,9 @@
 // ExperienceCard.tsx
 
-import React from "react";
-import { FaBriefcase } from "react-icons/fa"; // Icon for experience
+import React, { useState } from "react";
+import { FaBriefcase, FaPen } from "react-icons/fa"; // Icon for experience
+
+import { ExperienceUpdate } from "./edits/ui/ExperienceUpdate";
 
 interface Experience {
   company: string;
@@ -14,13 +16,18 @@ interface Experience {
 interface ExperienceCardProps {
   experience: Experience[] | undefined;
   formatDateRange: (startDate: string, endDate?: string) => string;
+  profileId: string;
 }
 
 const ExperienceCard: React.FC<ExperienceCardProps> = ({
   experience,
   formatDateRange,
+  profileId,
 }) => {
-  if (!experience) return <h1 className="text-center text-red-500">No Experience</h1>;
+  const [isExperienceDialogOpen, setIsExperienceDialogOpen] = useState(false);
+
+  if (!experience)
+    return <h1 className="text-center text-red-500">No Experience</h1>;
 
   return (
     <div className="mt-5">
@@ -49,6 +56,22 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
                 <p className="mt-2 text-gray-100 italic">{exp.story}</p>
               )}
             </div>
+            <FaPen
+              className="text-yellow-400 cursor-pointer hover:text-yellow-500"
+              onClick={() => {
+                console.log({
+                  profileId: profileId,
+                  exp: exp,
+                });
+                setIsExperienceDialogOpen(true);
+              }}
+            />
+            <ExperienceUpdate
+              isOpen={isExperienceDialogOpen}
+              setIsOpen={setIsExperienceDialogOpen}
+              experienceIndex={index}
+              experience={exp}
+            />
           </div>
         ))}
       </div>
