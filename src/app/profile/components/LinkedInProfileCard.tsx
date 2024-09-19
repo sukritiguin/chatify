@@ -1,12 +1,16 @@
+import { useState } from "react";
+
 import Image from "next/image";
-import { Profile } from "../../../../types/profile.interface";
 import { FaPen } from "react-icons/fa";
-import ExperienceCard from "./ExperienceCard";
-import EducationCard from "./EducationCard";
+
+import { BannerUpdate } from "./edits/ui/BannerUpdate";
+
 import SkillCard from "./SkillCard";
 import SocialsCard from "./SocialsCard";
-import { useState } from "react";
-import { BannerUpdate } from "./edits/ui/BannerUpdate";
+import EducationCard from "./EducationCard";
+import ExperienceCard from "./ExperienceCard";
+
+import { Profile } from "../../../../types/profile.interface";
 
 // Utility function to format date and calculate duration
 const formatDateRange = (startDate: string, endDate?: string) => {

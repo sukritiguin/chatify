@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import { useQuery } from "convex/react";
+
 import { api } from "../../../convex/_generated/api";
-// import ProfileCard from "./components/ProfileCard";
+
 import { Profile } from "../../../types/profile.interface";
+
+// import ProfileCard from "./components/ProfileCard";
 import { LinkedInProfileCard } from "./components/LinkedInProfileCard";
 
 // Function to map Convex data to the UserProfile interface

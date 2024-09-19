@@ -66,6 +66,22 @@ const profile = defineTable({
   ),
 });
 
-const schema = defineSchema({ ...authTables, profile });
+// Define the organizations table
+const organizations = defineTable({
+  name: v.string(), // Organization name (required)
+  description: v.optional(v.string()), // Optional description of the organization
+  website: v.optional(v.string()), // Optional website URL
+  logo: v.optional(v.string()), // Optional logo of the organization
+  coverPhoto: v.optional(v.string()), // Optional cover photo for the organization
+  address: v.optional(v.string()), // Optional address of the organization
+  industry: v.optional(v.string()), // Optional industry the organization belongs to
+  established: v.optional(v.string()), // Optional year of establishment
+
+  // Reference to the users table for the admin or owner of the organization
+  adminUserId: v.id("users"), // Admin or creator of the organization (foreign key to users table)
+
+});
+
+const schema = defineSchema({ ...authTables, profile, organizations });
 
 export default schema;
