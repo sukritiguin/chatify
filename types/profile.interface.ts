@@ -26,6 +26,7 @@ export interface Experience {
 }
 
 export interface Profile {
+  name: string;
   coverPhoto?: string;
   profilePhoto?: string;
   bio?: string;
@@ -38,6 +39,7 @@ export interface Profile {
 export interface UserProfile {
   _creationTime: number;
   _id: string;
+  name: string;
   bio?: string;
   coverPhoto?: string;
   educations?: Education[];

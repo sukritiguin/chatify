@@ -82,7 +82,7 @@ export const LinkedInProfileCard = ({
           </div>
           {/* Name below the profile photo */}
           <div className="flex flex-col items-start">
-            <h2 className="text-black text-3xl font-bold">Sukriti Guin</h2>
+            <h2 className="text-black text-3xl font-bold">{profile.name}</h2>
             <p className="text-black">{profile?.bio}</p>
           </div>
           {/* Experience Section */}

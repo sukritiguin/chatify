@@ -28,6 +28,7 @@ export const getUserProfile = query({
 export const insertProfile = mutation({
   args: {
     data: v.object({
+      name: v.string(),
       coverPhoto: v.optional(v.string()),
       profilePhoto: v.optional(v.string()),
       bio: v.optional(v.string()),
@@ -114,6 +115,7 @@ export const insertProfile = mutation({
     // Insert data into the profile table with userId and data
     const newProfileId = await ctx.db.insert("profile", {
       userId: userId,
+      name: data.name,
       coverPhoto: data.coverPhoto,
       profilePhoto: data.profilePhoto,
       bio: data.bio,

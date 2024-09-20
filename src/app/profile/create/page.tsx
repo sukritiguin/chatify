@@ -58,6 +58,7 @@ type HandleExperienceChangeType = (
 const CreateProfile = () => {
   const router = useRouter(); // Get router instance
   const [profile, setProfile] = useState<Profile>({
+    name: "",
     coverPhoto: "",
     profilePhoto: "",
     bio: "",
@@ -276,6 +277,19 @@ const CreateProfile = () => {
             >
               {/* Cover Photo Upload */}
               <div className="flex flex-col">
+                <Label className="my-2">Enter your name, e.g Jon Doe</Label>
+                <Input
+                  type="text"
+                  className="mb-3"
+                  placeholder="Enter your name, e.g Jon Doe"
+                  required
+                  onChange={(event) => {
+                    setProfile((prevProfile) => ({
+                      ...prevProfile,
+                      name: event.target.value,
+                    }));
+                  }}
+                />
                 <Label className="my-2">Upload your banner</Label>
                 <Input
                   type="file"

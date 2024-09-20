@@ -4,6 +4,7 @@ import { v } from "convex/values";
 
 const profile = defineTable({
   userId: v.id("users"),
+  name: v.string(),
   coverPhoto: v.optional(v.string()),
   profilePhoto: v.optional(v.string()),
   bio: v.optional(v.string()),
