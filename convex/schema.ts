@@ -72,7 +72,7 @@ const organizations = defineTable({
   description: v.optional(v.string()), // Optional description of the organization
   website: v.optional(v.string()), // Optional website URL
   logo: v.optional(v.string()), // Optional logo of the organization
-  coverPhoto: v.optional(v.string()), // Optional cover photo for the organization
+  banner: v.optional(v.string()), // Optional cover photo for the organization
   address: v.optional(v.string()), // Optional address of the organization
   industry: v.optional(v.string()), // Optional industry the organization belongs to
   established: v.optional(v.string()), // Optional year of establishment

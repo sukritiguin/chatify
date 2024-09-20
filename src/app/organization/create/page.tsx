@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 // import {
@@ -276,10 +277,87 @@ import {
 } from "react-icons/fa";
 import ImageCropper from "./components/ImageCropper"; // Adjust the import based on your file structure
 import Image from "next/image";
+import { uploadImageToCloudinary } from "@/lib/cloudinary.utility";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Textarea } from "@/components/ui/textarea";
+
+import { useRouter } from "next/navigation";
+import Loader from "@/components/ui/Loader";
+
+const convertBlobUrlToFile = async (
+  blobUrl: string,
+  fileName: string
+): Promise<File> => {
+  const response = await fetch(blobUrl); // Fetch the Blob data from the URL
+  const blob = await response.blob(); // Get the Blob from the response
+  const file = new File([blob], fileName, { type: blob.type }); // Convert Blob to File
+  return file;
+};
 
 const CreateOrganization = () => {
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [bannerImage, setBannerImage] = useState<string | null>(null);
+
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [website, setWebsite] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
+  const [industry, setIndustry] = useState<string>("");
+  const [establishedYear, setEstablishedYear] = useState<string>("");
+
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const insertOrganization = useMutation(api.queries.insertOrganization);
+  const existingOrganization = useQuery(api.queries.getOrganization);
+
+  const router = useRouter();
+
+  const handleSubmit = async () => {
+    // TODO: Write Handle Submit Code Here..
+
+    const logoBolb = await convertBlobUrlToFile(logoImage!, "logo.png");
+    const bannerBolb = await convertBlobUrlToFile(bannerImage!, "banner.png");
+
+    const logoPublicUrl = await uploadImageToCloudinary(logoBolb);
+    const bannerPublicUrl = await uploadImageToCloudinary(bannerBolb);
+
+    console.log({
+      logo: logoImage,
+      banner: bannerImage,
+      logoBolb,
+      bannerBolb,
+      logoPublicUrl,
+      bannerPublicUrl,
+    });
+
+    const data = {
+      name: name, // Organization name (required)
+      description: description, // Optional description of the organization
+      website: website, // Optional website URL
+      logo: logoPublicUrl, // Optional logo of the organization
+      banner: bannerPublicUrl, // Optional cover photo for the organization
+      address: address, // Optional address of the organization
+      industry: industry, // Optional industry the organization belongs to
+      established: establishedYear, // Optional year of establishment
+    };
+
+    try {
+      setLoading(true);
+      await insertOrganization({ data });
+      router.push("/organization");
+      setLoading(false);
+    } catch {
+      console.log("Error inserting organization");
+    }
+  };
+
+  if (existingOrganization !== null && existingOrganization !== undefined) {
+    router.push("/organization");
+  }
+
+  if (existingOrganization === undefined || loading) return <Loader />;
+
 
   return (
     <div className="flex flex-col items-center justify-center bg-gradient-to-r from-purple-50 via-gray-100 to-purple-50 text-gray-900 p-6">
@@ -307,6 +385,10 @@ const CreateOrganization = () => {
               placeholder="e.g. Amazon"
               required
               className="border-purple-400 focus:ring-purple-500 focus:border-purple-500"
+              onChange={(event) => {
+                setName(event.target.value);
+              }}
+              value={name}
             />
           </div>
 
@@ -318,11 +400,12 @@ const CreateOrganization = () => {
             >
               <FaInfoCircle className="mr-2 text-purple-700" /> Description
             </Label>
-            <Input
-              type="text"
+            <Textarea
               id="description"
               placeholder="Short description of your organization"
               className="border-purple-400 focus:ring-purple-500 focus:border-purple-500"
+              onChange={(event) => setDescription(event.target.value)}
+              value={description}
             />
           </div>
 
@@ -339,11 +422,14 @@ const CreateOrganization = () => {
               id="website"
               placeholder="https://www.example.com"
               className="border-purple-400 focus:ring-purple-500 focus:border-purple-500"
+              onChange={(event) => {
+                setWebsite(event.target.value);
+              }}
+              value={website}
             />
           </div>
 
           {/* Logo Cropper */}
-          
 
           <ImageCropper
             aspect={1}
@@ -367,7 +453,7 @@ const CreateOrganization = () => {
 
           {/* Banner Cropper */}
           <ImageCropper
-            aspect={16/9}
+            aspect={4 / 1}
             onCropComplete={(croppedImage) => setBannerImage(croppedImage)}
             icon={<FaCamera />} // Replace with your icon component
             label="Upload Banner"
@@ -399,6 +485,10 @@ const CreateOrganization = () => {
               id="address"
               placeholder="e.g. 123 Street, City, Country"
               className="border-purple-400 focus:ring-purple-500 focus:border-purple-500"
+              onChange={(event) => {
+                setAddress(event.target.value);
+              }}
+              value={address}
             />
           </div>
 
@@ -415,6 +505,10 @@ const CreateOrganization = () => {
               id="industry"
               placeholder="e.g. Technology, Education, Healthcare"
               className="border-purple-400 focus:ring-purple-500 focus:border-purple-500"
+              onChange={(event) => {
+                setIndustry(event.target.value);
+              }}
+              value={industry}
             />
           </div>
 
@@ -432,11 +526,20 @@ const CreateOrganization = () => {
               id="established"
               placeholder="e.g. 1999"
               className="border-purple-400 focus:ring-purple-500 focus:border-purple-500"
+              onChange={(event) => {
+                setEstablishedYear(event.target.value);
+              }}
+              value={establishedYear}
             />
           </div>
 
           {/* Submit Button */}
-          <Button className="w-full bg-purple-600 text-white">Register</Button>
+          <Button
+            className="w-full bg-purple-600 text-white"
+            onClick={handleSubmit}
+          >
+            Register
+          </Button>
         </CardContent>
       </Card>
     </div>

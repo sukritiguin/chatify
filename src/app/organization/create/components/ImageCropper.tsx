@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from "react";
 import Cropper from "react-easy-crop";
 import { getCroppedImg } from "@/lib/cropImage"; // Adjust this import based on your file structure
@@ -20,7 +21,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
   label,
 }) => {
   const [logoSrc, setLogoSrc] = useState<string | null>(null); // Image source
-  const [croppedArea, setCroppedArea] = useState(null);
+  const [croppedArea, setCroppedArea] = useState<any>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
