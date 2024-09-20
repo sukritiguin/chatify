@@ -5,7 +5,7 @@ import {
   updateExperience,
 } from "./function/profile.function";
 
-import { insertOrganization, getOrganization, getOrganizationById } from "./function/organization.function";
+import { insertOrganization, getOrganization, getOrganizationById, getAllOrganizations } from "./function/organization.function";
 
 export {
   getUserProfile,
@@ -14,5 +14,6 @@ export {
   updateExperience,
   insertOrganization,
   getOrganization,
-  getOrganizationById
+  getOrganizationById,
+  getAllOrganizations
 };

@@ -37,6 +37,19 @@ export const getOrganizationById = query({
   },
 });
 
+export const getAllOrganizations = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    return ctx.db.query("organizations").collect();
+  },
+});
+
 export const insertOrganization = mutation({
   args: {
     data: v.object({

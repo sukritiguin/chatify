@@ -4,7 +4,11 @@ import { FaTrash, FaCalendarAlt, FaUniversity, FaBook } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Education } from "../../../../../types/profile.interface";
-
+import { useQuery } from "convex/react";
+import { api } from "../../../../../convex/_generated/api";
+import Link from "next/link";
+import Loader from "@/components/ui/Loader";
+import { Id } from "../../../../../convex/_generated/dataModel";
 
 const EducationCard = ({
   education,
@@ -15,6 +19,14 @@ const EducationCard = ({
   index: number; // Assuming index is a number
   removeEducation: (index: number) => void; // Define removeEducation function type
 }) => {
+  const organization = useQuery(api.queries.getOrganizationById, {organizationId: education.institute as Id<"organizations">});
+
+  if(organization === undefined) {
+    return <Loader />;
+  }
+
+  console.log({organization})
+
   return (
     <Card className="mb-6 p-6 shadow-lg rounded-lg bg-gradient-to-r from-green-100 to-green-300 hover:shadow-2xl transition-shadow duration-200 ease-in-out">
       <CardContent>
@@ -22,7 +34,7 @@ const EducationCard = ({
           {/* Institute */}
           <div className="flex items-center space-x-3 text-lg font-semibold text-gray-900">
             <FaUniversity className="text-gray-500 text-2xl" />
-            <span className="flex-grow">{education.institute}</span>
+            <span className="flex-grow"><Link href={`/organization/${education.institute}`}>{organization?.name}</Link></span>
             <Button
               variant="ghost"
               size="sm"

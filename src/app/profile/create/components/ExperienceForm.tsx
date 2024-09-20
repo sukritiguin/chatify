@@ -8,8 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import React from "react";
+import React, { useState } from "react";
 import { Experience } from "../../../../../types/profile.interface";
+import { useQuery } from "convex/react";
+import { api } from "../../../../../convex/_generated/api";
+import Loader from "@/components/ui/Loader";
+import Image from "next/image";
 
 const ExperienceForm = ({
   experience,
@@ -24,16 +28,88 @@ const ExperienceForm = ({
     value: string
   ) => void;
 }) => {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const organizations = useQuery(api.queries.getAllOrganizations);
+
+  if (organizations === undefined) return <Loader />;
+
+  const filteredOrganizations = organizations.filter((organization) =>
+    organization.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div>
-      <Input
+      {/* <Input
         className="my-1"
         placeholder="Company"
         value={experience.company}
         onChange={(e) =>
           handleExperienceChange(index, "company", e.target.value)
         }
-      />
+        disabled={true}
+      /> */}
+
+      {/* Add experience list down for company */}
+
+      <Select
+        onValueChange={(value) =>
+          handleExperienceChange(index, "company", value)
+        } // Store the selected organization ID
+        value={experience.company}
+      >
+        <SelectTrigger className="w-full h-16">
+          <SelectValue placeholder="Select an Organization" />
+        </SelectTrigger>
+        <SelectContent>
+          {/* Search Input */}
+          <div className="p-2">
+            <input
+              type="text"
+              placeholder="Search organizations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+
+          {/* Display filtered organizations */}
+          {filteredOrganizations.map((organization) => (
+            <SelectItem
+              key={organization._id}
+              value={organization._id}
+              className="h-16 flex items-center space-x-2"
+            >
+              {organization.logo ? (
+                <Image
+                  src={organization.logo}
+                  alt={`${organization.name} logo`}
+                  className="w-8 h-8 rounded-full" // Adjust size as needed
+                  width={36}
+                  height={36}
+                />
+              ) : (
+                <div className="w-8 h-8 flex items-center justify-center bg-gray-300 rounded-full text-white font-bold">
+                  {organization.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <span className="text-gray-650 font-semibold">{organization.name}</span>
+            </SelectItem>
+          ))}
+
+          {/* Show a message if no organizations are found */}
+          {filteredOrganizations.length === 0 && (
+            <div className="p-2 text-gray-500">No organizations found.</div>
+          )}
+        </SelectContent>
+      </Select>
+
+      {/* Display selected organization */}
+      {/* {selectedOrganization && (
+        <div className="mt-4">
+          <p>Selected Organization: {organizations.find(org => org.id === selectedOrganization)?.name}</p>
+        </div>
+      )} */}
+
       <Input
         className="my-1"
         placeholder="Designation"

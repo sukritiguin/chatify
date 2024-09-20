@@ -41,7 +41,7 @@ import {
   Skill,
 } from "../../../../types/profile.interface";
 import { useRouter } from "next/navigation";
-import Loader from "@/components/ui/Loader"
+import Loader from "@/components/ui/Loader";
 
 type RemoveEducationType = (index: number) => void;
 type HandleEducationChangeType = (
@@ -578,12 +578,15 @@ const CreateProfile = () => {
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Level" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent defaultValue={"Begineer"}>
                           <SelectItem value="Beginner">Beginner</SelectItem>
                           <SelectItem value="Intermediate">
                             Intermediate
                           </SelectItem>
                           <SelectItem value="Advanced">Advanced</SelectItem>
+                          <SelectItem value="Proficient">Proficient</SelectItem>
+                          <SelectItem value="Expert">Expert</SelectItem>
+                          <SelectItem value="Master">Master</SelectItem>
                         </SelectContent>
                       </Select>
                       <button
