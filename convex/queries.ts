@@ -12,6 +12,7 @@ import {
   getAllOrganizations,
 } from "./function/organization.function";
 
+import { getUserRegistration } from "./function/register.function";
 
 export {
   getUserProfile,
@@ -22,4 +23,5 @@ export {
   getOrganization,
   getOrganizationById,
   getAllOrganizations,
+  getUserRegistration,
 };

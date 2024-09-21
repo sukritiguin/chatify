@@ -125,6 +125,11 @@ export const insertProfile = mutation({
       socials: data.socials,
     });
 
+    await ctx.db.insert("registeredAs", {
+      userId: userId,
+      type: "profile",
+    });
+
     return newProfileId; // Return the new profile ID
   },
 });

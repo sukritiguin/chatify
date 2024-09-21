@@ -83,6 +83,8 @@ const CreateProfile = () => {
   // Fetch user profile with proper typing
   const userProfile = useQuery(api.queries.getUserProfile);
 
+  const isUserRegistered = useQuery(api.queries.getUserRegistration);
+
   useEffect(() => {
     // Check the profile data after it has been fetched
     if (userProfile) {
@@ -95,6 +97,18 @@ const CreateProfile = () => {
   // Show loading spinner or message while fetching profile
   if (loading) {
     return <Loader size="large" color="#4A90E2" />;
+  }
+
+  if (isUserRegistered === undefined) {
+    return <Loader />;
+  }
+
+  if (isUserRegistered) {
+    if (isUserRegistered.type === "profile") {
+      router.push("/profile");
+    } else {
+      router.push("/organization");
+    }
   }
 
   const handleFileUpload = async (

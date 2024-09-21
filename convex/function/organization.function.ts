@@ -97,6 +97,11 @@ export const insertOrganization = mutation({
       established: data.established,
     });
 
+    await ctx.db.insert("registeredAs", {
+      userId: userId,
+      type: "organization",
+    });
+
     return newOrganizationId; // Return the new profile ID
   },
 });

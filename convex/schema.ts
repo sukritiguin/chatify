@@ -82,10 +82,18 @@ const organizations = defineTable({
   adminUserId: v.id("users"), // Admin or creator of the organization (foreign key to users table)
 });
 
+// A table to keep track of the use who has individual profile or organization. Because a single user can't have both things together
+
+const registeredAs = defineTable({
+  userId: v.id("users"),
+  type: v.union(v.literal("profile"), v.literal("organization")),
+});
+
 const schema = defineSchema({
   ...authTables,
   profile,
   organizations,
+  registeredAs,
 });
 
 export default schema;

@@ -352,12 +352,25 @@ const CreateOrganization = () => {
     }
   };
 
+  const isUserRegistered = useQuery(api.queries.getUserRegistration);
+
+  if (isUserRegistered === undefined) {
+    return <Loader />;
+  }
+
+  if (isUserRegistered) {
+    if (isUserRegistered.type === "profile") {
+      router.push("/profile");
+    } else {
+      router.push("/organization");
+    }
+  }
+
   if (existingOrganization !== null && existingOrganization !== undefined) {
     router.push("/organization");
   }
 
   if (existingOrganization === undefined || loading) return <Loader />;
-
 
   return (
     <div className="flex flex-col items-center justify-center bg-gradient-to-r from-purple-50 via-gray-100 to-purple-50 text-gray-900 p-6">
