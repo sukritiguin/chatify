@@ -3,9 +3,16 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import OrganizationCard from "../components/OrganizationCard";
+import { Id } from "../../../../convex/_generated/dataModel";
 
-const OrganizationIdPage = ({ params }: { params: { organizationId: string } }) => {
-  const organization = useQuery(api.queries.getOrganizationById, { organizationId: params.organizationId });
+const OrganizationIdPage = ({
+  params,
+}: {
+  params: { organizationId: string };
+}) => {
+  const organization = useQuery(api.queries.getOrganizationById, {
+    organizationId: params.organizationId as Id<"organizations">,
+  });
 
   const data = {
     name: organization?.name, // Organization name (required)
@@ -18,7 +25,12 @@ const OrganizationIdPage = ({ params }: { params: { organizationId: string } }) 
     established: organization?.established, // Optional year of establishment
   };
 
-  return <OrganizationCard organization={data} />;
+  return (
+    <OrganizationCard
+      organization={data}
+      myOrganization={false}
+    />
+  );
 };
 
 export default OrganizationIdPage;

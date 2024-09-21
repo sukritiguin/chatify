@@ -25,7 +25,7 @@ const OrganizationPage = () => {
       <div className="max-w-7xl mx-auto flex justify-between overflow-hidden">
         {/* Left Side: Organization Card */}
         <div className="w-3/5 p-4">
-          <OrganizationCard organization={data} />
+          <OrganizationCard organization={data} myOrganization={true}/>
         </div>
         
         {/* Right Side: Related Organizations Section */}

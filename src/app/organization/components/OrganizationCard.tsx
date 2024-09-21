@@ -1,11 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Image from "next/image";
-import React from "react";
-import { FaGlobe, FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa";
+"use client";
 
-const OrganizationCard = ({ organization }: { organization: any }) => {
+import Image from "next/image";
+import React, { useState } from "react";
+import { FaGlobe, FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa";
+import FollowAndFollowing from "../[organizationId]/components/followAndFollowing";
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+
+interface OrganizationCardProps {
+  organization: any;
+  myOrganization: boolean;
+}
+
+const OrganizationCard = ({
+  organization,
+  myOrganization
+}: OrganizationCardProps) => {
+  const [isFollowing, setIsFollowing] = useState(false);
+
+
+  const onHandleClickFollowing = () => {
+    if (isFollowing === true) {
+      setIsFollowing(false);
+    } else {
+      setIsFollowing(true);
+    }
+  };
+
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="max-w-lg mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Banner with 4:1 aspect ratio */}
       <div className="relative">
         {organization.banner && (
@@ -32,7 +57,14 @@ const OrganizationCard = ({ organization }: { organization: any }) => {
         {" "}
         {/* Padding top to prevent content overlap with logo */}
         <h2 className="text-2xl font-semibold text-gray-800">
-          {organization.name}
+          <div className="flex items-center">
+            {organization.name}{" "}
+            {!myOrganization && (
+              <div onClick={onHandleClickFollowing}>
+                <FollowAndFollowing isFollowing={isFollowing} />
+              </div>
+            )}
+          </div>
         </h2>
         <p className="text-gray-600">
           {organization.description || "No description available."}

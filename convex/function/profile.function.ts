@@ -129,7 +129,6 @@ export const insertProfile = mutation({
   },
 });
 
-
 // Define the mutation to update the profile banner
 export const updateProfileBanner = mutation({
   args: {
@@ -162,7 +161,6 @@ export const updateProfileBanner = mutation({
     return existingProfile._id; // Return the profile ID
   },
 });
-
 
 // Define the mutation to update a single experience
 export const updateExperience = mutation({

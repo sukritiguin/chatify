@@ -80,9 +80,12 @@ const organizations = defineTable({
 
   // Reference to the users table for the admin or owner of the organization
   adminUserId: v.id("users"), // Admin or creator of the organization (foreign key to users table)
-
 });
 
-const schema = defineSchema({ ...authTables, profile, organizations });
+const schema = defineSchema({
+  ...authTables,
+  profile,
+  organizations,
+});
 
 export default schema;
