@@ -149,7 +149,7 @@ export default function RootLayout({
                 </aside>
 
                 {/* Main Content Area */}
-                <main className="flex-grow bg-gray-100 rounded-lg p-6 shadow">
+                <main className="flex-grow bg-gray-100 text-gray-900 rounded-lg p-6 shadow">
                   {children}
                 </main>
 
