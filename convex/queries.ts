@@ -14,6 +14,8 @@ import {
 
 import { getUserRegistration } from "./function/register.function";
 
+import { insertPost } from "./function/feed.function";
+
 export {
   getUserProfile,
   insertProfile,
@@ -24,4 +26,5 @@ export {
   getOrganizationById,
   getAllOrganizations,
   getUserRegistration,
+  insertPost,
 };

@@ -22,22 +22,34 @@ import { MdPermMedia } from "react-icons/md";
 import { FaTrash } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import { uploadImageToCloudinary } from "@/lib/cloudinary.utility";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import Loader from "@/components/ui/Loader";
 // import { Dialog as  } from "@radix-ui/react-dialog"; // Import for extra images modal
 
 const PostCreator: React.FC = () => {
   const [content, setContent] = useState<string>(""); // State for post content
   const [images, setImages] = useState<File[]>([]); // State for uploaded images
-  const [visibility, setVisibility] = useState<string>("public"); // State for post visibility
+  const [imagesUrl, setImagesUrl] = useState<string[]>([]);
+  const [visibility, setVisibility] = useState<
+    "public" | "connections" | "private"
+  >("public"); // State for post visibility
   const [extraImagesDialogOpen, setExtraImagesDialogOpen] =
     useState<boolean>(false); // Modal state for extra images
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const insertPost = useMutation(api.queries.insertPost);
 
   // Function to handle form submission
-  const handlePostSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handlePostSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!content) {
       toast.error("Content cannot be empty!"); // Notify user
       return;
     }
+
+    setLoading(true);
 
     // Handle the post creation logic
     console.log("Post Content:", content);
@@ -46,10 +58,35 @@ const PostCreator: React.FC = () => {
     toast.success("Post created successfully!");
     setContent("");
     setImages([]); // Reset images
+
+    const uploadedImageUrls: string[] = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const imageUrl = await uploadImageToCloudinary(images[i]);
+      console.log("Uploaded image urls:", i, imageUrl);
+      uploadedImageUrls.push(imageUrl as string);
+    }
+
+    setImagesUrl(uploadedImageUrls);
+
+    const data = {
+      content: content,
+      media: imagesUrl,
+      visibility: visibility,
+    };
+
+    await insertPost({ data: data });
+
+    console.log("Uploaded Images Urls:", imagesUrl);
+    toast.success("Post created successfully!");
+
+    setLoading(false);
   };
 
   // Function to handle image upload
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoading(true);
+
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files).filter(
         (file) => file.type.startsWith("image/") // Check if the file is an image
@@ -71,12 +108,16 @@ const PostCreator: React.FC = () => {
       // Update state with the combined images
       setImages((prev) => [...prev.slice(0, 15), ...newImages]);
     }
+
+    setLoading(false);
   };
 
   // Function to remove an uploaded image
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index)); // Remove image by index
   };
+
+  if (loading) return <Loader />;
 
   return (
     <div className="flex items-center justify-center p-6 bg-gray-100">
@@ -113,13 +154,20 @@ const PostCreator: React.FC = () => {
                 </span>
                 {/* Replace with actual user name */}
                 <div className="flex space-x-2 items-center">
-                  <Select value={visibility} onValueChange={setVisibility}>
+                  <Select
+                    value={visibility}
+                    onValueChange={(value) =>
+                      setVisibility(
+                        value as "public" | "connections" | "private"
+                      )
+                    }
+                  >
                     <SelectTrigger className="text-gray-700 font-semibold">
                       <SelectValue placeholder="Select visibility" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="connections-only">
+                      <SelectItem value="connections">
                         Connections Only
                       </SelectItem>
                       <SelectItem value="private">Private</SelectItem>
@@ -165,7 +213,7 @@ const PostCreator: React.FC = () => {
                     />
                     <button
                       type="button"
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      className="absolute top-1 right-1 text-red-500 p-1 hover:text-red-600"
                       onClick={() => removeImage(index)}
                     >
                       <FaTrash />
@@ -220,7 +268,7 @@ const PostCreator: React.FC = () => {
                             />
                             <button
                               type="button"
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                              className="absolute top-1 right-1 text-red-500 p-1 hover:text-red-600"
                               onClick={() => removeImage(6 + index)} // Adjust index for remaining images
                             >
                               <FaTrash />
