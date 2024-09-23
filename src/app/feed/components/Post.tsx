@@ -68,7 +68,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 mb-4 border border-gray-300 max-w-md mx-auto">
+    <div className="bg-white rounded-lg shadow-lg p-4 mb-4 border border-gray-300 max-w-2xl mx-auto">
       {/* User Information */}
       <div className="flex items-center mb-4">
         <Image

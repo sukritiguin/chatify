@@ -1,33 +1,46 @@
+"use client";
+import { useQuery } from "convex/react";
 import Post from "./components/Post";
 import PostCreator from "./components/PostCreator";
+import { api } from "../../../convex/_generated/api";
+
+interface PostDataInterface {
+  id: string;
+  content: string;
+  images?: string[];
+  user: {
+    name: string;
+    profileImage: string;
+  };
+  createdAt: string;
+  visibility: "public" | "connections" | "private";
+}
 
 const FeedPage = () => {
-  const postData = {
-    id: "1",
-    content: "Excited to share my new project!",
-    images: [],
-    user: {
-      name: "Sukriti Guin",
-      profileImage:
-        "https://res.cloudinary.com/doznopi6d/image/upload/v1726929651/uc1tzgrgekniqagf6y22.png",
-    },
-    createdAt: new Date().toISOString(),
-    visibility: "public",
-  };
+  const allPosts = useQuery(api.queries.getAllPosts);
+
+  if (!allPosts) return <></>;
 
   return (
     <div className="">
       <PostCreator />
-      <Post post={postData} />
-      <Post post={postData} />
-      <Post post={postData} />
-      <Post post={postData} />
-      <Post post={postData} />
-      <Post post={postData} />
-      <Post post={postData} />
-      <Post post={postData} />
-      <Post post={postData} />
-      <Post post={postData} />
+      {allPosts.map((singlePost) => {
+        const name = singlePost.profile?.name;
+        const profileImage = singlePost.profile?.profilePhoto;
+        const post: PostDataInterface = {
+          id: singlePost.post._id,
+          content: singlePost.post.content,
+          images: singlePost.post.media,
+          user: {
+            name: name as string,
+            profileImage: profileImage as string,
+          },
+          createdAt: singlePost.post.createdAt as string,
+          visibility: singlePost.post.visibility,
+        };
+
+        return <Post key={post.id} post={post} />;
+      })}
     </div>
   );
 };

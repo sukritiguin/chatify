@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "../_generated/server";
+import { mutation, query } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const insertPost = mutation({
@@ -56,5 +56,34 @@ export const insertPost = mutation({
 
     // Insert the post into the "posts" table
     await ctx.db.insert("posts", dataObject);
+  },
+});
+
+export const getAllPosts = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    const posts = await ctx.db.query("posts").order("desc").collect();
+
+    if (!posts) return null;
+
+    const allPosts = [];
+
+    for (let i = 0; i < posts.length; i++) {
+      allPosts.push({
+        profile: await ctx.db
+          .query("profile")
+          .filter((q) => q.eq(q.field("userId"), posts[i].userId))
+          .first(),
+        post: posts[i],
+      });
+    }
+
+    return allPosts;
   },
 });
