@@ -7,6 +7,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Separator } from "@/components/ui/separator";
+import { SingleCommand } from "./Command";
 
 interface PostProps {
   post: {
@@ -38,6 +39,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [showReactions, setShowReactions] = useState(false); // Track reaction dropdown
   const [comment, setComment] = useState(""); // Track user comment
+  const [isCommentDialogOpen, setCommentDialogOpen] = useState(false);
 
   const [likedReaction, setLikedReaction] = useState<string | null>(null); // Track liked reaction
 
@@ -67,7 +69,15 @@ const Post: React.FC<PostProps> = ({ post }) => {
     setDialogOpen(false);
     setSelectedImageUrl(null); // Reset selected image URL
   };
+  // Open the comment dialog
+  const openCommentDialog = () => {
+    setCommentDialogOpen(true);
+  };
 
+  // Close the comment dialog
+  const closeCommentDialog = () => {
+    setCommentDialogOpen(false);
+  };
   // Open dialog with selected image
   const openImageDialog = (imageUrl: string) => {
     setSelectedImageUrl(imageUrl);
@@ -182,9 +192,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
         <div className="p-2 rounded-t-lg">
           <div className="flex justify-between text-gray-600">
             {reactionCount && reactionCount > 0 && (
-              <span className="text-green-500">
-                {reactionCount} reactions
-              </span>
+              <span className="text-green-500">{reactionCount} reactions</span>
             )}
             <span className="text-gray-600">{0} comments</span>
             <span className="text-gray-600">{0} shares</span>
@@ -224,7 +232,10 @@ const Post: React.FC<PostProps> = ({ post }) => {
             )}
           </div>
 
-          <button className="flex items-center hover:text-blue-500">
+          <button
+            className="flex items-center hover:text-blue-500"
+            onClick={openCommentDialog}
+          >
             <FaComment className="mr-1" />
             Comment
           </button>
@@ -290,6 +301,10 @@ const Post: React.FC<PostProps> = ({ post }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {isCommentDialogOpen && (
+        <SingleCommand closeCommentDialog={closeCommentDialog} user={user}/>
       )}
 
       {/* Popup Image Viewer */}
