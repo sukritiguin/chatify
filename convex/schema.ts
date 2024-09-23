@@ -203,16 +203,16 @@ const postReactions = defineTable({
   postId: v.id("posts"), // The post being reacted to
   userId: v.id("users"), // The user reacting to the post
   reactionType: v.union(
-    v.literal("like"), // Like reaction
-    v.literal("celebrate"), // Celebrate reaction
-    v.literal("support"), // Support reaction
-    v.literal("insightful"), // Insightful reaction
-    v.literal("love"),
-    v.literal("sad")
+    v.literal("Like"), // Like reaction
+    v.literal("Celebrate"), // Celebrate reaction
+    v.literal("Support"), // Support reaction
+    v.literal("Insightful"), // Insightful reaction
+    v.literal("Love"),
+    v.literal("Sad"),
+    v.literal("Funny")
   ),
   createdAt: v.string(), // Timestamp when the reaction was made
 });
-
 
 const schema = defineSchema({
   ...authTables,
@@ -226,11 +226,10 @@ const schema = defineSchema({
   notifications,
   userConnections,
   userFollowings,
-  postReactions
+  postReactions,
 });
 
 export default schema;
-
 
 /*
 

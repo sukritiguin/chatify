@@ -15,7 +15,13 @@ import {
 
 import { getUserRegistration } from "./function/register.function";
 
-import { insertPost, getAllPosts } from "./function/feed.function";
+import {
+  insertPost,
+  getAllPosts,
+  likePost,
+  getReaction,
+  getReactionCountByPostId,
+} from "./function/feed.function";
 
 export {
   getUserProfile,
@@ -30,4 +36,7 @@ export {
   insertPost,
   getAllPosts,
   getUserProfileById,
+  likePost,
+  getReaction,
+  getReactionCountByPostId,
 };

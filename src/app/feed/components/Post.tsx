@@ -1,8 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { FaThumbsUp, FaComment, FaShare } from "react-icons/fa";
 import { formatDistanceToNow } from "date-fns"; // For formatting timestamps
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { Separator } from "@/components/ui/separator";
 
 interface PostProps {
   post: {
@@ -33,8 +37,25 @@ const Post: React.FC<PostProps> = ({ post }) => {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [showReactions, setShowReactions] = useState(false); // Track reaction dropdown
-  const [likedReaction, setLikedReaction] = useState<string | null>(null); // Track liked reaction
   const [comment, setComment] = useState(""); // Track user comment
+
+  const [likedReaction, setLikedReaction] = useState<string | null>(null); // Track liked reaction
+
+  const likePost = useMutation(api.queries.likePost);
+  const existingReaction = useQuery(api.queries.getReaction, {
+    postId: post.id as Id<"posts">,
+  });
+  const reactionCount = useQuery(api.queries.getReactionCountByPostId, {
+    postId: post.id as Id<"posts">,
+  });
+
+  console.log({ existingReaction: existingReaction });
+
+  useEffect(() => {
+    if (existingReaction) {
+      setLikedReaction(existingReaction?.reactionType);
+    }
+  }, [existingReaction]);
 
   // Open the dialog
   const openDialog = () => {
@@ -55,9 +76,36 @@ const Post: React.FC<PostProps> = ({ post }) => {
 
   // Handle reaction selection
   const handleReactionSelect = (reaction: string) => {
+    if (likedReaction !== null) {
+      likePost({
+        postId: post.id as Id<"posts">,
+        reactionType: likedReaction as
+          | "Celebrate"
+          | "Support"
+          | "Insightful"
+          | "Sad"
+          | "Funny"
+          | "Love"
+          | "Like",
+        increase: false,
+      });
+    }
     setLikedReaction(reaction);
     setShowReactions(false); // Close the dropdown after selecting
     console.log(`Post liked with reaction: ${reaction}`);
+
+    likePost({
+      postId: post.id as Id<"posts">,
+      reactionType: reaction as
+        | "Celebrate"
+        | "Support"
+        | "Insightful"
+        | "Sad"
+        | "Funny"
+        | "Love"
+        | "Like",
+      increase: true,
+    });
   };
 
   // Handle comment submission
@@ -129,43 +177,63 @@ const Post: React.FC<PostProps> = ({ post }) => {
       )}
 
       {/* Interaction Buttons */}
-      <div className="flex justify-between text-gray-600 mt-4 relative">
-        <div
-          className="flex items-center relative"
-          onMouseEnter={() => setShowReactions(true)}
-          onMouseLeave={() => setShowReactions(false)}
-        >
-          <button className="flex items-center hover:text-blue-500">
-            <FaThumbsUp className="mr-1" />
-            {likedReaction ? likedReaction : "Like"}
-            {likedReaction && (
-              <span className="ml-1">
-                {reactions.find((r) => r.label === likedReaction)?.emoji}
+
+      <div className="flex flex-col mt-4 relative">
+        <div className="p-2 rounded-t-lg">
+          <div className="flex justify-between text-gray-600">
+            {reactionCount && reactionCount > 0 && (
+              <span className="text-green-500">
+                {reactionCount} reactions
               </span>
             )}
-          </button>
-          {showReactions && (
-            <div className="absolute top-2 left-0 z-10 bg-white shadow-lg rounded-lg border border-gray-300 mt-2 flex space-x-2 p-2">
-              {reactions.map((reaction) => (
-                <button
-                  key={reaction.label}
-                  className="flex items-center p-1 hover:bg-gray-50 hover:rounded-full cursor-pointer"
-                  onClick={() => handleReactionSelect(reaction.label)}
-                >
-                  <span className="text-lg">{reaction.emoji}</span>
-                </button>
-              ))}
-            </div>
-          )}
+            <span className="text-gray-600">{0} comments</span>
+            <span className="text-gray-600">{0} shares</span>
+          </div>
         </div>
-        <button className="flex items-center hover:text-blue-500">
-          <FaComment className="mr-1" />
-          Comment
-        </button>
-        <button className="flex items-center hover:text-blue-500">
-          <FaShare className="mr-1" />
-          Share
-        </button>
+        <Separator />
+        <div className="flex justify-between text-gray-600 mt-1 relative">
+          <div
+            className="flex items-center relative"
+            onMouseEnter={() => setShowReactions(true)}
+            onMouseLeave={() => setShowReactions(false)}
+          >
+            <button className="flex flex-col items-center hover:text-blue-500">
+              <div className="flex items-center">
+                <FaThumbsUp className="mr-1" />
+                <span>{likedReaction ? likedReaction : "Like"}</span>
+                {likedReaction && (
+                  <span className="ml-1">
+                    {reactions.find((r) => r.label === likedReaction)?.emoji}
+                  </span>
+                )}
+              </div>
+            </button>
+
+            {showReactions && (
+              <div className="absolute top-2 left-0 z-10 bg-white shadow-lg rounded-lg border border-gray-300 mt-2 flex space-x-2 p-2">
+                {reactions.map((reaction) => (
+                  <button
+                    key={reaction.label}
+                    className="flex items-center p-1 hover:bg-gray-50 hover:rounded-full cursor-pointer"
+                    onClick={() => handleReactionSelect(reaction.label)}
+                  >
+                    <span className="text-lg">{reaction.emoji}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button className="flex items-center hover:text-blue-500">
+            <FaComment className="mr-1" />
+            Comment
+          </button>
+
+          <button className="flex items-center hover:text-blue-500">
+            <FaShare className="mr-1" />
+            Share
+          </button>
+        </div>
       </div>
 
       {/* Comment Input Box (conditionally rendered) */}
