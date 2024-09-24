@@ -39,6 +39,9 @@ export const SingleCommand = ({
 
   const comments = useQuery(api.queries.getCommentByPostId, { postId: postId });
 
+  const currentOrganizationAvatar = useQuery(api.queries.getOrganization)?.logo;
+  const currentProfileAvatar = useQuery(api.queries.getUserProfile)?.profilePhoto;
+
   const handleReply = (commentId: Id<"comments">) => {
     setReplyingTo(commentId);
     commentDialogRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -141,7 +144,7 @@ export const SingleCommand = ({
         {/* Write New Comment */}
         <form onSubmit={handleCommentSubmit} className="flex items-center">
           <Image
-            src={user.profileImage}
+            src={currentOrganizationAvatar || (currentProfileAvatar as string)}
             alt={user.name}
             className="w-10 h-10 rounded-full border-2 border-blue-500 mr-2"
             height={40}
@@ -187,7 +190,7 @@ export const SingleCommand = ({
                 className="flex items-center mt-2"
               >
                 <Image
-                  src={user.profileImage}
+                  src={currentOrganizationAvatar || (currentProfileAvatar as string)}
                   alt={user.name}
                   className="w-10 h-10 rounded-full border-2 border-blue-500 mr-2"
                   height={40}

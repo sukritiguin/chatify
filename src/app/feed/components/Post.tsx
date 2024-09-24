@@ -53,6 +53,9 @@ const Post: React.FC<PostProps> = ({ post }) => {
 
   const postComment = useMutation(api.queries.postComment);
 
+  const currentOrganizationAvatar = useQuery(api.queries.getOrganization)?.logo;
+  const currentProfileAvatar = useQuery(api.queries.getUserProfile)?.profilePhoto;
+
   console.log({ existingReaction: existingReaction });
 
   useEffect(() => {
@@ -270,7 +273,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
       {likedReaction && (
         <form onSubmit={handleCommentSubmit} className="mt-4 flex items-center">
           <Image
-            src={user.profileImage}
+            src={currentOrganizationAvatar || currentProfileAvatar as string}
             alt={user.name}
             className="w-10 h-10 rounded-full border-2 border-blue-500 mr-2"
             height={40}
