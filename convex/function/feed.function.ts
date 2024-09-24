@@ -437,3 +437,28 @@ export const deletePost = mutation({
     }
   },
 });
+
+export const deleteComment = mutation({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const userId = getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    try {
+      await ctx.db.delete(args.commentId);
+      const replies = await ctx.db
+        .query("comments")
+        .filter((q) => q.eq(q.field("parentId"), args.commentId))
+        .collect();
+
+      for (const reply of replies) {
+        await ctx.db.delete(reply._id);
+      }
+    } catch (error) {
+      throw new Error("unable to delete post");
+    }
+  },
+});
