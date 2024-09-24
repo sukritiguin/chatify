@@ -27,8 +27,10 @@ const FeedPage = () => {
     <div className="">
       <PostCreator />
       {allPosts.map((singlePost) => {
-        const name = singlePost.profile?.name;
-        const profileImage = singlePost.profile?.profilePhoto;
+        const name = singlePost.profile?.name || singlePost.organization?.name;
+        const profileImage =
+          singlePost.profile?.profilePhoto || singlePost.organization?.logo;
+
         const post: PostDataInterface = {
           id: singlePost.post._id,
           content: singlePost.post.content,

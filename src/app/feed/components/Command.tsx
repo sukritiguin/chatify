@@ -1,3 +1,4 @@
+"use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery } from "convex/react";
 import Image from "next/image";
@@ -25,7 +26,7 @@ export const SingleCommand = ({
   user: any;
   postId: any;
 }) => {
-  const [comment, setComment] = useState("");
+  const [mainComment, setMainComment] = useState("");
   const [replyComment, setReplyComment] = useState("");
   // const [showReactions, setShowReactions] = useState(false);
   const [hoveredComment, setHoveredComment] = useState<Id<"comments"> | null>(
@@ -40,7 +41,9 @@ export const SingleCommand = ({
   const comments = useQuery(api.queries.getCommentByPostId, { postId: postId });
 
   const currentOrganizationAvatar = useQuery(api.queries.getOrganization)?.logo;
-  const currentProfileAvatar = useQuery(api.queries.getUserProfile)?.profilePhoto;
+  const currentProfileAvatar = useQuery(
+    api.queries.getUserProfile
+  )?.profilePhoto;
 
   const handleReply = (commentId: Id<"comments">) => {
     setReplyingTo(commentId);
@@ -52,11 +55,11 @@ export const SingleCommand = ({
     setHoveredComment(null);
   };
 
-  const handleCommentSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleMainCommentSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = {
       postId: postId,
-      content: comment,
+      content: mainComment,
       parentId: undefined,
       reactions: {
         like: 0n, // Number of likes
@@ -70,7 +73,7 @@ export const SingleCommand = ({
     };
 
     await postComment({ data: data });
-    setComment("");
+    setMainComment("");
   };
 
   const handleReplyComment = async (event: FormEvent<HTMLFormElement>) => {
@@ -124,7 +127,10 @@ export const SingleCommand = ({
                     isReply={false}
                   />
                   {comment.replies.map((reply) => (
-                    <div className="ml-12" key={reply.comment._id}>
+                    <div
+                      className="ml-12"
+                      key={`${reply.comment._id}-${comment.comment._id}`}
+                    >
                       <SingleComment
                         comment={reply}
                         handleReply={handleReply}
@@ -142,7 +148,7 @@ export const SingleCommand = ({
         </div>
 
         {/* Write New Comment */}
-        <form onSubmit={handleCommentSubmit} className="flex items-center">
+        <form onSubmit={handleMainCommentSubmit} className="flex items-center">
           <Image
             src={currentOrganizationAvatar || (currentProfileAvatar as string)}
             alt={user.name}
@@ -152,13 +158,13 @@ export const SingleCommand = ({
           />
           <input
             type="text"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
+            value={mainComment}
+            onChange={(e) => setMainComment(e.target.value)}
             placeholder="Write a comment..."
             className="border rounded-lg p-2 flex-grow"
             disabled={false}
           />
-          {comment && (
+          {mainComment && (
             <button
               type="submit"
               className="bg-blue-500 text-white rounded-lg px-4 py-2 ml-2"
@@ -190,7 +196,10 @@ export const SingleCommand = ({
                 className="flex items-center mt-2"
               >
                 <Image
-                  src={currentOrganizationAvatar || (currentProfileAvatar as string)}
+                  src={
+                    (currentOrganizationAvatar as string) ||
+                    (currentProfileAvatar as string)
+                  }
                   alt={user.name}
                   className="w-10 h-10 rounded-full border-2 border-blue-500 mr-2"
                   height={40}

@@ -80,6 +80,10 @@ export const getAllPosts = query({
           .query("profile")
           .filter((q) => q.eq(q.field("userId"), posts[i].userId))
           .first(),
+        organization: await ctx.db
+          .query("organizations")
+          .filter((q) => q.eq(q.field("adminUserId"), posts[i].userId))
+          .first(),
         post: posts[i],
       });
     }
@@ -294,16 +298,6 @@ export const postComment = mutation({
       reactions: data.reactions,
     };
 
-    // {
-    //   like: 0n, // Number of likes
-    //   celebrate: 0n, // Number of celebrates
-    //   support: 0n, // Number of supports
-    //   insightful: 0n, // Number of insightful reactions
-    //   love: 0n, // Number of loves
-    //   funny: 0n, // Number of funny
-    //   sad: 0n, // Number of sad
-    // }
-
     await ctx.db.insert("comments", validatedData);
   },
 });
@@ -364,7 +358,7 @@ export const getCommentByPostId = query({
           });
         } else if (organization) {
           allReplies.push({
-            comment: comment,
+            comment: reply,
             user: {
               avatar: organization.logo,
               name: organization.name,
