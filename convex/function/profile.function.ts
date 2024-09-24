@@ -3,6 +3,13 @@ import { query, mutation } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
+export const currentUserId = query({
+  args: {},
+  handler: async (ctx) => {
+    return await getAuthUserId(ctx);
+  },
+});
+
 export const getUserProfileById = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {

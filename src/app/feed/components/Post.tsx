@@ -8,6 +8,8 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { Separator } from "@/components/ui/separator";
 import { SingleCommand } from "./Command";
+import { MdDeleteForever } from "react-icons/md";
+import ConfirmationDialog from "@/components/ui/confirmationDialog";
 
 interface PostProps {
   post: {
@@ -17,6 +19,7 @@ interface PostProps {
     user: {
       name: string;
       profileImage: string;
+      userId: Id<"users">;
     };
     createdAt: string;
     visibility: "public" | "connections" | "private";
@@ -40,6 +43,8 @@ const Post: React.FC<PostProps> = ({ post }) => {
   const [showReactions, setShowReactions] = useState(false); // Track reaction dropdown
   const [comment, setComment] = useState(""); // Track user comment
   const [isCommentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [isDeleteConfirmationDialogOpen, setDeleteConfirmationDialogOpen] =
+    useState(false);
 
   const [likedReaction, setLikedReaction] = useState<string | null>(null); // Track liked reaction
 
@@ -57,10 +62,14 @@ const Post: React.FC<PostProps> = ({ post }) => {
     postId: post.id as Id<"posts">,
   });
 
+  const currentUserId = useQuery(api.queries.currentUserId);
+
   const currentOrganizationAvatar = useQuery(api.queries.getOrganization)?.logo;
   const currentProfileAvatar = useQuery(
     api.queries.getUserProfile
   )?.profilePhoto;
+
+  const deletePost = useMutation(api.queries.deletePost);
 
   console.log({ existingReaction: existingReaction });
 
@@ -69,6 +78,19 @@ const Post: React.FC<PostProps> = ({ post }) => {
       setLikedReaction(existingReaction?.reactionType);
     }
   }, [existingReaction]);
+
+  const handleDeleteClick = () => {
+    setDeleteConfirmationDialogOpen(true); // Open confirmation dialog
+  };
+
+  const handleConfirmDelete = () => {
+    deletePost({ postId: post.id as Id<"posts"> });
+    setDeleteConfirmationDialogOpen(false); // Close dialog after confirmation
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmationDialogOpen(false); // Close dialog without deleting
+  };
 
   // Open the dialog
   const openDialog = () => {
@@ -171,6 +193,21 @@ const Post: React.FC<PostProps> = ({ post }) => {
             {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
           </span>
         </div>
+        {post.user.userId === currentUserId && (
+          <div
+            className="ml-auto hover:cursor-pointer"
+            onClick={handleDeleteClick}
+          >
+            <MdDeleteForever />
+          </div>
+        )}
+        {/* Confirmation Dialog */}
+        <ConfirmationDialog
+          message="Are you sure you want to delete this post?"
+          isOpen={isDeleteConfirmationDialogOpen}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
       </div>
 
       {/* Post Content */}

@@ -420,3 +420,20 @@ export const totalCommentsByPostId = query({
     return total;
   },
 });
+
+export const deletePost = mutation({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, args) => {
+    const userId = getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    try {
+      await ctx.db.delete(args.postId);
+    } catch (error) {
+      throw new Error("unable to delete post");
+    }
+  },
+});

@@ -4,6 +4,7 @@ import {
   updateProfileBanner,
   updateExperience,
   getUserProfileById,
+  currentUserId,
 } from "./function/profile.function";
 
 import {
@@ -24,9 +25,11 @@ import {
   postComment,
   getCommentByPostId,
   totalCommentsByPostId,
+  deletePost
 } from "./function/feed.function";
 
 export {
+  currentUserId,
   getUserProfile,
   insertProfile,
   updateProfileBanner,
@@ -45,4 +48,5 @@ export {
   postComment,
   getCommentByPostId,
   totalCommentsByPostId,
+  deletePost
 };

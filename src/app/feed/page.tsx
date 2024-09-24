@@ -3,12 +3,14 @@ import { useQuery } from "convex/react";
 import Post from "./components/Post";
 import PostCreator from "./components/PostCreator";
 import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
 
 interface PostDataInterface {
   id: string;
   content: string;
   images?: string[];
   user: {
+    userId: Id<"users">;
     name: string;
     profileImage: string;
   };
@@ -32,6 +34,7 @@ const FeedPage = () => {
           content: singlePost.post.content,
           images: singlePost.post.media,
           user: {
+            userId: singlePost.post.userId,
             name: name as string,
             profileImage: profileImage as string,
           },
