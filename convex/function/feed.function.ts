@@ -326,7 +326,7 @@ export const getCommentByPostId = query({
     const allComments = [];
 
     for (const comment of comments) {
-      if (comment.parentId!==undefined) continue;
+      if (comment.parentId !== undefined) continue;
       const replies = await ctx.db
         .query("comments")
         .filter((q) => q.eq(q.field("parentId"), comment._id))
@@ -398,5 +398,25 @@ export const getCommentByPostId = query({
     }
 
     return allComments;
+  },
+});
+
+export const totalCommentsByPostId = query({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, args) => {
+    const userId = getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    const count = await ctx.db
+      .query("comments")
+      .filter((q) => q.eq(q.field("postId"), args.postId))
+      .collect();
+
+    const total = count.length;
+
+    return total;
   },
 });

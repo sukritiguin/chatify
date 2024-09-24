@@ -53,8 +53,14 @@ const Post: React.FC<PostProps> = ({ post }) => {
 
   const postComment = useMutation(api.queries.postComment);
 
+  const totalComments = useQuery(api.queries.totalCommentsByPostId, {
+    postId: post.id as Id<"posts">,
+  });
+
   const currentOrganizationAvatar = useQuery(api.queries.getOrganization)?.logo;
-  const currentProfileAvatar = useQuery(api.queries.getUserProfile)?.profilePhoto;
+  const currentProfileAvatar = useQuery(
+    api.queries.getUserProfile
+  )?.profilePhoto;
 
   console.log({ existingReaction: existingReaction });
 
@@ -145,6 +151,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
     };
 
     await postComment({ data: data });
+    openCommentDialog();
   };
 
   return (
@@ -214,10 +221,10 @@ const Post: React.FC<PostProps> = ({ post }) => {
         <div className="p-2 rounded-t-lg">
           <div className="flex justify-between text-gray-600">
             {reactionCount && reactionCount > 0 && (
-              <span className="text-green-500">{reactionCount} reactions</span>
+              <span className="text-green-500">{reactionCount} likes</span>
             )}
-            <span className="text-gray-600">{0} comments</span>
-            <span className="text-gray-600">{0} shares</span>
+            <span className="text-green-500">{totalComments} comments</span>
+            <span className="text-green-500">{0} shares</span>
           </div>
         </div>
         <Separator />
@@ -273,7 +280,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
       {likedReaction && (
         <form onSubmit={handleCommentSubmit} className="mt-4 flex items-center">
           <Image
-            src={currentOrganizationAvatar || currentProfileAvatar as string}
+            src={currentOrganizationAvatar || (currentProfileAvatar as string)}
             alt={user.name}
             className="w-10 h-10 rounded-full border-2 border-blue-500 mr-2"
             height={40}

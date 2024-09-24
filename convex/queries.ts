@@ -23,6 +23,7 @@ import {
   getReactionCountByPostId,
   postComment,
   getCommentByPostId,
+  totalCommentsByPostId,
 } from "./function/feed.function";
 
 export {
@@ -43,4 +44,5 @@ export {
   getReactionCountByPostId,
   postComment,
   getCommentByPostId,
+  totalCommentsByPostId,
 };
