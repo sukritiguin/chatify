@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery } from "convex/react";
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { formatDistanceToNow } from "date-fns";
@@ -32,12 +32,18 @@ export const SingleCommand = ({
   );
   const [replyingTo, setReplyingTo] = useState<Id<"comments"> | null>(null);
 
+  const [commadDisabled, setCommadDisabled] = useState(false);
+
+  const commentDialogRef = useRef<HTMLDivElement | null>(null);
+
   const postComment = useMutation(api.queries.postComment);
 
   const comments = useQuery(api.queries.getCommentByPostId, { postId: postId });
 
   const handleReply = (commentId: Id<"comments">) => {
+    setCommadDisabled(true);
     setReplyingTo(commentId);
+    commentDialogRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleReactionSelect = (reaction: string) => {
@@ -95,7 +101,9 @@ export const SingleCommand = ({
                   />
                   <div className="flex flex-col">
                     <div className="flex items-center">
-                      <span className="font-semibold">{comment.user.name} {"●"}</span>
+                      <span className="font-semibold">
+                        {comment.user.name} {"●"}
+                      </span>
                       <span className="text-gray-500 text-sm ml-2">
                         {formatDistanceToNow(
                           new Date(comment.comment.createdAt),
@@ -164,6 +172,7 @@ export const SingleCommand = ({
             onChange={(e) => setComment(e.target.value)}
             placeholder="Write a comment..."
             className="border rounded-lg p-2 flex-grow"
+            disabled={commadDisabled}
           />
           {comment && (
             <button
@@ -176,30 +185,49 @@ export const SingleCommand = ({
         </form>
 
         {/* Reply Input Box */}
-        {replyingTo !== null && (
-          <div className="mt-4 border-t pt-2">
-            <h4 className="text-lg font-semibold">
-              Replying to comment #{replyingTo}
-            </h4>
-            <form onSubmit={() => {}} className="flex items-center mt-2">
-              <input
-                type="text"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Write a reply..."
-                className="border rounded-lg p-2 flex-grow"
-              />
-              {comment && (
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white rounded-lg px-4 py-2 ml-2"
+        <div className="" ref={commentDialogRef}>
+          {replyingTo !== null && (
+            <div className="mt-4 border-t pt-2">
+              <h4 className="text-lg font-semibold">
+                Replying to comment #{" "}
+                <span
+                  className="filter blur-sm"
+                  style={{
+                    userSelect: "none" /* Prevents text selection */,
+                    WebkitUserSelect: "none" /* For Safari */,
+                    MozUserSelect: "none" /* For Firefox */,
+                  }}
                 >
-                  Reply
-                </button>
-              )}
-            </form>
-          </div>
-        )}
+                  {replyingTo}
+                </span>
+              </h4>
+              <form onSubmit={() => {}} className="flex items-center mt-2">
+                <Image
+                  src={user.profileImage}
+                  alt={user.name}
+                  className="w-10 h-10 rounded-full border-2 border-blue-500 mr-2"
+                  height={40}
+                  width={40}
+                />
+                <input
+                  type="text"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Write a reply..."
+                  className="border rounded-lg p-2 flex-grow"
+                />
+                {comment && (
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white rounded-lg px-4 py-2 ml-2"
+                  >
+                    Reply
+                  </button>
+                )}
+              </form>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
