@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,7 @@ import { FaTrash } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import { uploadImageToCloudinary } from "@/lib/cloudinary.utility";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import Loader from "@/components/ui/Loader";
 // import { Dialog as  } from "@radix-ui/react-dialog"; // Import for extra images modal
@@ -38,6 +38,30 @@ const PostCreator: React.FC = () => {
   const [extraImagesDialogOpen, setExtraImagesDialogOpen] =
     useState<boolean>(false); // Modal state for extra images
   const [loading, setLoading] = useState<boolean>(false);
+  const [userData, setUserData] = useState<{
+    name: string;
+    avatar: string;
+  }>({
+    name: "",
+    avatar: "",
+  });
+
+  const currentUserProfile = useQuery(api.queries.getUserProfile);
+  const currentOrganization = useQuery(api.queries.getOrganization);
+
+  useEffect(() => {
+    if (currentUserProfile) {
+      setUserData({
+        name: currentUserProfile.name,
+        avatar: currentUserProfile.profilePhoto || "",
+      });
+    } else if (currentOrganization) {
+      setUserData({
+        name: currentOrganization.name,
+        avatar: currentOrganization.logo || "",
+      });
+    }
+  }, [currentUserProfile, currentOrganization]);
 
   const insertPost = useMutation(api.queries.insertPost);
 
@@ -142,7 +166,7 @@ const PostCreator: React.FC = () => {
           <form onSubmit={handlePostSubmit} className="space-y-4">
             <div className="flex items-center mb-4">
               <Image
-                src="https://res.cloudinary.com/doznopi6d/image/upload/v1726929651/uc1tzgrgekniqagf6y22.png" // Replace with actual user profile image
+                src={userData.avatar} // Replace with actual user profile image
                 alt="Profile"
                 className="w-12 h-12 rounded-full border-2 border-blue-500 mr-3"
                 height={36}
@@ -150,7 +174,7 @@ const PostCreator: React.FC = () => {
               />
               <div className="flex flex-col">
                 <span className="font-semibold text-gray-800">
-                  Sukriti Guin
+                  {userData.name}
                 </span>
                 {/* Replace with actual user name */}
                 <div className="flex space-x-2 items-center">
