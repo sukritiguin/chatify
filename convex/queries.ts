@@ -21,6 +21,8 @@ import {
   likePost,
   getReaction,
   getReactionCountByPostId,
+  postComment,
+  getCommentByPostId,
 } from "./function/feed.function";
 
 export {
@@ -39,4 +41,6 @@ export {
   likePost,
   getReaction,
   getReactionCountByPostId,
+  postComment,
+  getCommentByPostId,
 };

@@ -51,6 +51,8 @@ const Post: React.FC<PostProps> = ({ post }) => {
     postId: post.id as Id<"posts">,
   });
 
+  const postComment = useMutation(api.queries.postComment);
+
   console.log({ existingReaction: existingReaction });
 
   useEffect(() => {
@@ -119,10 +121,27 @@ const Post: React.FC<PostProps> = ({ post }) => {
   };
 
   // Handle comment submission
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Comment submitted:", comment);
     setComment(""); // Reset comment input
+
+    const data = {
+      postId: post.id as Id<"posts">,
+      content: comment,
+      parentId: undefined,
+      reactions: {
+        like: 0n, // Number of likes
+        celebrate: 0n, // Number of celebrates
+        support: 0n, // Number of supports
+        insightful: 0n, // Number of insightful reactions
+        love: 0n, // Number of loves
+        funny: 0n, // Number of funny
+        sad: 0n, // Number of sad
+      },
+    };
+
+    await postComment({ data: data });
   };
 
   return (
@@ -304,7 +323,11 @@ const Post: React.FC<PostProps> = ({ post }) => {
       )}
 
       {isCommentDialogOpen && (
-        <SingleCommand closeCommentDialog={closeCommentDialog} user={user}/>
+        <SingleCommand
+          closeCommentDialog={closeCommentDialog}
+          user={user}
+          postId={post.id}
+        />
       )}
 
       {/* Popup Image Viewer */}

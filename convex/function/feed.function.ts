@@ -255,3 +255,107 @@ export const getReactionCountByPostId = query({
     return existingReactions.length;
   },
 });
+
+export const postComment = mutation({
+  args: {
+    data: v.object({
+      postId: v.id("posts"), // The post this comment is associated with
+      content: v.string(), // The text content of the comment
+      parentId: v.optional(v.id("comments")), // ID of the parent comment for nested replies
+      reactions: v.optional(
+        v.object({
+          like: v.int64(), // Number of likes
+          celebrate: v.int64(), // Number of celebrates
+          support: v.int64(), // Number of supports
+          insightful: v.int64(), // Number of insightful reactions
+          love: v.int64(), // Number of loves
+          funny: v.int64(), // Number of funny
+          sad: v.int64(), // Number of sad
+        })
+      ),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const { data } = args;
+
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const validatedData = {
+      postId: data.postId,
+      userId: userId,
+      content: data.content,
+      parentId: data.parentId,
+      createdAt: new Date().toString(),
+      updatedAt: new Date().toString(),
+      reactions: data.reactions,
+    };
+
+    // {
+    //   like: 0n, // Number of likes
+    //   celebrate: 0n, // Number of celebrates
+    //   support: 0n, // Number of supports
+    //   insightful: 0n, // Number of insightful reactions
+    //   love: 0n, // Number of loves
+    //   funny: 0n, // Number of funny
+    //   sad: 0n, // Number of sad
+    // }
+
+    await ctx.db.insert("comments", validatedData);
+  },
+});
+
+export const getCommentByPostId = query({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const comments = await ctx.db
+      .query("comments")
+      .filter((q) => q.eq(q.field("postId"), args.postId))
+      .order("desc")
+      .collect();
+
+    const allComments = [];
+
+    for (const comment of comments) {
+      const profile = await ctx.db
+        .query("profile")
+        .filter((q) => q.eq(q.field("userId"), comment.userId))
+        .first();
+      const organization = await ctx.db
+        .query("organizations")
+        .filter((q) => q.eq(q.field("adminUserId"), comment.userId))
+        .first();
+
+      if (profile) {
+        allComments.push({
+          comment: comment,
+          user: {
+            avatar: profile.profilePhoto,
+            name: profile.name,
+            userId: profile.userId,
+          },
+        });
+      } else if (organization) {
+        allComments.push({
+          comment: comment,
+          user: {
+            avatar: organization.logo,
+            name: organization.name,
+            userId: organization.adminUserId,
+          },
+        });
+      }
+    }
+
+    return allComments;
+  },
+});
