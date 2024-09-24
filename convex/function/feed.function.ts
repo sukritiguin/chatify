@@ -326,6 +326,12 @@ export const getCommentByPostId = query({
     const allComments = [];
 
     for (const comment of comments) {
+      if (comment.parentId!==undefined) continue;
+      const replies = await ctx.db
+        .query("comments")
+        .filter((q) => q.eq(q.field("parentId"), comment._id))
+        .collect();
+
       const profile = await ctx.db
         .query("profile")
         .filter((q) => q.eq(q.field("userId"), comment.userId))
@@ -335,6 +341,39 @@ export const getCommentByPostId = query({
         .filter((q) => q.eq(q.field("adminUserId"), comment.userId))
         .first();
 
+      const allReplies = [];
+
+      for (const reply of replies) {
+        const profile = await ctx.db
+          .query("profile")
+          .filter((q) => q.eq(q.field("userId"), reply.userId))
+          .first();
+        const organization = await ctx.db
+          .query("organizations")
+          .filter((q) => q.eq(q.field("adminUserId"), reply.userId))
+          .first();
+
+        if (profile) {
+          allReplies.push({
+            comment: reply,
+            user: {
+              avatar: profile.profilePhoto,
+              name: profile.name,
+              userId: profile.userId,
+            },
+          });
+        } else if (organization) {
+          allReplies.push({
+            comment: comment,
+            user: {
+              avatar: organization.logo,
+              name: organization.name,
+              userId: organization.adminUserId,
+            },
+          });
+        }
+      }
+
       if (profile) {
         allComments.push({
           comment: comment,
@@ -343,6 +382,7 @@ export const getCommentByPostId = query({
             name: profile.name,
             userId: profile.userId,
           },
+          replies: allReplies,
         });
       } else if (organization) {
         allComments.push({
@@ -352,6 +392,7 @@ export const getCommentByPostId = query({
             name: organization.name,
             userId: organization.adminUserId,
           },
+          replies: allReplies,
         });
       }
     }
