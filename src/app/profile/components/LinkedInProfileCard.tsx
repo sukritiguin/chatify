@@ -55,7 +55,7 @@ export const LinkedInProfileCard = ({
             className="rounded-lg w-full"
           />
           {/* Edit Icon */}
-          <div className="">
+          {profileId && <div className="">
             <div
               className="absolute right-4 top-4 cursor-pointer mt-1 mr-1"
               onClick={() => setIsBannerDialogOpen(true)}
@@ -69,7 +69,7 @@ export const LinkedInProfileCard = ({
               isOpen={isBannerDialogOpen}
               setIsOpen={setIsBannerDialogOpen}
             />
-          </div>
+          </div>}
           {/* Profile Photo (absolute positioned) */}
           <div className="flex -mt-12 ml-2 left-8 -bottom-12">
             <Image
@@ -95,7 +95,6 @@ export const LinkedInProfileCard = ({
             educations={profile.educations}
             formatDateRange={formatDateRange}
           />
-          s
           <SkillCard skills={profile.skills} />
           <SocialsCard socials={profile.socials} />
         </div>
