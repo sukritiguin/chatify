@@ -16,8 +16,17 @@ import { SentMessage } from "./SentMessage";
 import Picker, { EmojiClickData } from "emoji-picker-react"; // Import the emoji picker
 import ImageUploadModal from "./ImageUploadModal";
 import { IoSend } from "react-icons/io5";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
-const MessageComponent = () => {
+const MessageComponent = ({
+  conversationId,
+}: {
+  conversationId: Id<"conversation">;
+}) => {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -25,6 +34,56 @@ const MessageComponent = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]); // State to hold uploaded files
+
+  // Logic to start build conversation
+
+  const sender = useQuery(api.queries.currentUserId);
+
+  const conversation = useQuery(
+    api.queries.getExistingConversationByConversationId,
+    { conversationId: conversationId }
+  );
+
+  const receiver =
+    conversation?.firstUser === sender
+      ? conversation?.secondUser
+      : conversation?.firstUser;
+
+  const createNewMessage = useMutation(api.queries.createNewMessage);
+
+  const allMessages = useQuery(api.queries.getMessageByConversationId, {
+    conversationId: conversationId,
+  });
+
+  let userInfo: {
+    name: string;
+    avatar: string;
+    profileUrl: string;
+  } = { name: "", avatar: "", profileUrl: "" };
+
+  const userRegistedAs = useQuery(api.queries.getUserRegistration);
+
+  if (userRegistedAs?.type == "profile") {
+    const profile = useQuery(api.queries.getUserProfileById, {
+      userId: receiver as Id<"users">,
+    });
+
+    userInfo = {
+      name: profile?.name as string,
+      avatar: profile?.profilePhoto as string,
+      profileUrl: `/profile/${profile?.userId}`,
+    };
+  } else {
+    const organization = useQuery(api.queries.getOrganizationByUserId, {
+      userId: receiver as Id<"users">,
+    });
+
+    userInfo = {
+      name: organization?.name as string,
+      avatar: organization?.logo as string,
+      profileUrl: `/organization/${organization?.adminUserId}`,
+    };
+  }
 
   const onEmojiClick = (emojiData: EmojiClickData, event: unknown) => {
     // console.log({ emojiObject: emojiObject });
@@ -61,15 +120,38 @@ const MessageComponent = () => {
     setShowEmojiPicker(false); // Close the emoji picker after selection
   };
 
+  const onSendMessage = async () => {
+    console.log({
+      content: message,
+      conversationId: conversationId,
+    });
+    await createNewMessage({
+      content: message,
+      conversationId: conversationId,
+    });
+    setMessage("");
+  };
+
+  const router = useRouter();
+
   return (
     <div className="max-w-2xl mx-auto">
       {/* Message Card */}
       <Card>
         {/* Header */}
         <CardHeader className="flex justify-between items-center p-4 bg-gray-100">
-          <div className="flex items-center space-x-2">
-            <FaUserCircle className="text-gray-500 w-8 h-8" />
-            <span className="font-semibold text-gray-800">John Doe</span>
+          <div className="flex items-center space-x-2 hover:underline hover:cursor-pointer"
+            onClick={()=>{router.push(userInfo.profileUrl)}}
+          >
+            {userInfo.avatar ? (
+              <Avatar className="w-6 h-6">
+                <AvatarImage src={userInfo.avatar} alt="@shadcn" />
+                <AvatarFallback>{"S"}</AvatarFallback>
+              </Avatar>
+            ) : (
+              <FaUserCircle className="text-gray-500 w-6 h-6" />
+            )}
+            <span className="font-semibold text-gray-800">{userInfo.name}</span>
           </div>
         </CardHeader>
 
@@ -83,10 +165,22 @@ const MessageComponent = () => {
         )}
         {/* Message History */}
         <CardContent className="space-y-4 h-64 overflow-y-auto p-4">
-          {/* User Message */}
-          <ReceivedMessage />
-          {/* My Message */}
-          <SentMessage />
+          {allMessages &&
+            allMessages.map((message, index) => (
+              <div key={message._id}>
+                {message.senderId == sender ? (
+                  <SentMessage
+                    content={message.content}
+                    messageUserId={message.senderId}
+                  />
+                ) : (
+                  <ReceivedMessage
+                    content={message.content}
+                    messageUserId={message.senderId}
+                  />
+                )}
+              </div>
+            ))}
         </CardContent>
 
         {/* Input Section */}
@@ -109,7 +203,7 @@ const MessageComponent = () => {
             />
             <IoSend
               className="hover:cursor-pointer hover:text-gray-800 text-gray-700"
-              onClick={() => console.log(files)}
+              onClick={() => onSendMessage()}
             />
           </div>
 

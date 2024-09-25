@@ -229,11 +229,14 @@ const conversation = defineTable({
   isGroupChat: v.boolean(),
   createdAt: v.optional(v.string()),
   updatedAt: v.optional(v.string()),
-  members: v.array(v.id("conversationParticipant")),
+  // members: v.array(v.id("users")),
+  firstUser: v.id("users"),
+  secondUser: v.id("users"),
 });
 
+
 const messages = defineTable({
-  conversationId: v.id("conversations"), // The conversation this message belongs to
+  conversationId: v.id("conversation"), // The conversation this message belongs to
   senderId: v.id("users"), // The user who sent the message
   content: v.string(), // The message text content
   media: v.optional(v.array(v.string())), // URLs of media (images, videos, documents)

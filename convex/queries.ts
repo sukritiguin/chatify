@@ -11,6 +11,7 @@ import {
   insertOrganization,
   getOrganization,
   getOrganizationById,
+  getOrganizationByUserId,
   getAllOrganizations,
 } from "./function/organization.function";
 
@@ -31,6 +32,14 @@ import {
   updatePost,
 } from "./function/feed.function";
 
+import {
+  checkExistingConversation,
+  addNewConversation,
+  getExistingConversationByConversationId,
+  createNewMessage,
+  getMessageByConversationId,
+} from "./function/message.function";
+
 export {
   currentUserId,
   getUserProfile,
@@ -40,6 +49,7 @@ export {
   insertOrganization,
   getOrganization,
   getOrganizationById,
+  getOrganizationByUserId,
   getAllOrganizations,
   getUserRegistration,
   insertPost,
@@ -55,4 +65,9 @@ export {
   deleteComment,
   getPostById,
   updatePost,
+  checkExistingConversation,
+  addNewConversation,
+  getExistingConversationByConversationId,
+  createNewMessage,
+  getMessageByConversationId,
 };

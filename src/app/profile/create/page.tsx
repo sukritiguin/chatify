@@ -42,6 +42,7 @@ import {
 } from "../../../../types/profile.interface";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/ui/Loader";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 type RemoveEducationType = (index: number) => void;
 type HandleEducationChangeType = (
@@ -68,6 +69,7 @@ const CreateProfile = () => {
     ],
     skills: [{ skill: "", level: "" }],
     socials: { linkedIn: "", github: "", twitter: "" },
+    userId: "" as Id<"users">,
   });
 
   const insertProfile = useMutation(api.queries.insertProfile);
