@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // ExperienceCard.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { FaBriefcase, FaPen } from "react-icons/fa"; // Icon for experience
+import React, { useState } from "react";
+import { FaPen } from "react-icons/fa"; // Icon for experience
 
 import { ExperienceUpdate } from "./edits/ui/ExperienceUpdate";
 import { useQuery } from "convex/react";
@@ -108,16 +109,18 @@ const SingleExperienceCard = ({
         )}
         {exp.story && <p className="mt-2 text-gray-100 italic">{exp.story}</p>}
       </div>
-      <FaPen
-        className="text-yellow-400 cursor-pointer hover:text-yellow-500"
-        onClick={() => {
-          console.log({
-            profileId: profileId,
-            exp: exp,
-          });
-          setIsExperienceDialogOpen(true);
-        }}
-      />
+      {profileId && (
+        <FaPen
+          className="text-yellow-400 cursor-pointer hover:text-yellow-500"
+          onClick={() => {
+            console.log({
+              profileId: profileId,
+              exp: exp,
+            });
+            setIsExperienceDialogOpen(true);
+          }}
+        />
+      )}
       <ExperienceUpdate
         isOpen={isExperienceDialogOpen}
         setIsOpen={setIsExperienceDialogOpen}
@@ -144,6 +147,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
       <div className="mt-4 space-y-4">
         {experience.map((exp, index) => (
           <SingleExperienceCard
+            key={index}
             exp={exp}
             index={index}
             formatDateRange={formatDateRange}

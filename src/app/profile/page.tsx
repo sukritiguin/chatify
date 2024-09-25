@@ -10,7 +10,7 @@ import { Profile } from "../../../types/profile.interface";
 import { LinkedInProfileCard } from "./components/LinkedInProfileCard";
 
 // Function to map Convex data to the UserProfile interface
-function mapConvexDataToUserProfile(profileData: any): Profile {
+export function mapConvexDataToUserProfile(profileData: any): Profile {
   if (profileData == null) {
     return {
       name: "",
