@@ -94,8 +94,8 @@ const posts = defineTable({
   content: v.string(), // Text content of the post/shared post
   media: v.optional(v.array(v.string())), // URLs of media (images, videos, documents)
   // User should not be allowed to share media while sharing post // TODO: Implement
-  createdAt: v.string(), // Timestamp when the post was created
-  updatedAt: v.string(), // Last updated timestamp
+  createdAt: v.optional(v.string()), // Timestamp when the post was created
+  updatedAt: v.optional(v.string()), // Last updated timestamp
   visibility: v.union(
     v.literal("public"), // Public post visible to everyone
     v.literal("connections"), // Visible to connections only
@@ -115,7 +115,7 @@ const posts = defineTable({
   commentCount: v.int64(), // Number of comments on the post
   shareCount: v.int64(), // Number of shares of the post
   isPromoted: v.optional(v.boolean()), // Is the post a promoted one
-  sharedPostId: v.optional(v.id("posts")), // Refers to the original post (if this post is a share)
+  sharedPostId: v.optional(v.string()), // Refers to the original post (if this post is a share)
 });
 
 const comments = defineTable({
@@ -203,16 +203,16 @@ const postReactions = defineTable({
   postId: v.id("posts"), // The post being reacted to
   userId: v.id("users"), // The user reacting to the post
   reactionType: v.union(
-    v.literal("like"), // Like reaction
-    v.literal("celebrate"), // Celebrate reaction
-    v.literal("support"), // Support reaction
-    v.literal("insightful"), // Insightful reaction
-    v.literal("love"),
-    v.literal("sad")
+    v.literal("Like"), // Like reaction
+    v.literal("Celebrate"), // Celebrate reaction
+    v.literal("Support"), // Support reaction
+    v.literal("Insightful"), // Insightful reaction
+    v.literal("Love"),
+    v.literal("Sad"),
+    v.literal("Funny")
   ),
   createdAt: v.string(), // Timestamp when the reaction was made
 });
-
 
 const schema = defineSchema({
   ...authTables,
@@ -226,11 +226,10 @@ const schema = defineSchema({
   notifications,
   userConnections,
   userFollowings,
-  postReactions
+  postReactions,
 });
 
 export default schema;
-
 
 /*
 

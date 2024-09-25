@@ -3,6 +3,8 @@ import {
   insertProfile,
   updateProfileBanner,
   updateExperience,
+  getUserProfileById,
+  currentUserId,
 } from "./function/profile.function";
 
 import {
@@ -14,7 +16,23 @@ import {
 
 import { getUserRegistration } from "./function/register.function";
 
+import {
+  insertPost,
+  getAllPosts,
+  likePost,
+  getReaction,
+  getReactionCountByPostId,
+  postComment,
+  getCommentByPostId,
+  totalCommentsByPostId,
+  deletePost,
+  deleteComment,
+  getPostById,
+  updatePost,
+} from "./function/feed.function";
+
 export {
+  currentUserId,
   getUserProfile,
   insertProfile,
   updateProfileBanner,
@@ -24,4 +42,17 @@ export {
   getOrganizationById,
   getAllOrganizations,
   getUserRegistration,
+  insertPost,
+  getAllPosts,
+  getUserProfileById,
+  likePost,
+  getReaction,
+  getReactionCountByPostId,
+  postComment,
+  getCommentByPostId,
+  totalCommentsByPostId,
+  deletePost,
+  deleteComment,
+  getPostById,
+  updatePost,
 };
