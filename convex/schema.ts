@@ -214,6 +214,55 @@ const postReactions = defineTable({
   createdAt: v.string(), // Timestamp when the reaction was made
 });
 
+const conversationParticipant = defineTable({
+  userId: v.id("users"), // ID of the participant (user)
+  role: v.union(
+    v.literal("admin"), // Admin of the group (in case of group chat)
+    v.literal("member") // Regular participant
+  ),
+  joinedAt: v.optional(v.string()), // Timestamp when the user joined the conversation
+});
+
+const conversation = defineTable({
+  title: v.string(),
+  avatar: v.optional(v.string()),
+  isGroupChat: v.boolean(),
+  createdAt: v.optional(v.string()),
+  updatedAt: v.optional(v.string()),
+  members: v.array(v.id("conversationParticipant")),
+});
+
+const messages = defineTable({
+  conversationId: v.id("conversations"), // The conversation this message belongs to
+  senderId: v.id("users"), // The user who sent the message
+  content: v.string(), // The message text content
+  media: v.optional(v.array(v.string())), // URLs of media (images, videos, documents)
+  createdAt: v.string(), // Timestamp when the message was sent
+  updatedAt: v.optional(v.string()), // Timestamp of the last update (for editing the message)
+  isDeleted: v.optional(v.boolean()), // If the message has been deleted
+  isEdited: v.optional(v.boolean()), // If the message has been edited
+});
+
+const messageReactions = defineTable({
+  messageId: v.id("messages"), // The message being reacted to
+  userId: v.id("users"), // The user reacting to the message
+  reactionType: v.union(
+    v.literal("like"),
+    v.literal("love"),
+    v.literal("laugh"),
+    v.literal("wow"),
+    v.literal("sad"),
+    v.literal("angry")
+  ),
+  createdAt: v.optional(v.string()), // Timestamp when the reaction was made
+});
+
+const messageReads = defineTable({
+  messageId: v.id("messages"), // The message being read
+  userId: v.id("users"), // The user who read the message
+  readAt: v.string(), // Timestamp when the message was read
+});
+
 const schema = defineSchema({
   ...authTables,
   profile,
@@ -227,6 +276,12 @@ const schema = defineSchema({
   userConnections,
   userFollowings,
   postReactions,
+
+  messageReads,
+  messageReactions,
+  messages,
+  conversation,
+  conversationParticipant,
 });
 
 export default schema;
