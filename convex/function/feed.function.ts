@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
@@ -335,7 +336,7 @@ export const getCommentByPostId = query({
         .filter((q) => q.eq(q.field("adminUserId"), comment.userId))
         .first();
 
-      const allReplies = [];
+      const allReplies: any = [];
 
       for (const reply of replies) {
         const profile = await ctx.db
@@ -454,5 +455,49 @@ export const deleteComment = mutation({
     } catch (error) {
       throw new Error("unable to delete post");
     }
+  },
+});
+
+export const getPostById = query({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, args) => {
+    const userId = getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    const post = await ctx.db
+      .query("posts")
+      .filter((q) => q.eq(q.field("_id"), args.postId))
+      .first();
+
+    return post;
+  },
+});
+
+export const updatePost = mutation({
+  args: {
+    postId: v.id("posts"),
+    data: v.object({
+      visibility: v.union(
+        v.literal("public"),
+        v.literal("connections"),
+        v.literal("private")
+      ),
+      content: v.string(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const userId = getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    await ctx.db.patch(args.postId, {
+      visibility: args.data.visibility,
+      content: args.data.content,
+    });
   },
 });

@@ -27,6 +27,8 @@ import {
   totalCommentsByPostId,
   deletePost,
   deleteComment,
+  getPostById,
+  updatePost,
 } from "./function/feed.function";
 
 export {
@@ -51,4 +53,6 @@ export {
   totalCommentsByPostId,
   deletePost,
   deleteComment,
+  getPostById,
+  updatePost,
 };

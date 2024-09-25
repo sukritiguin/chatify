@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { FaThumbsUp, FaComment, FaShare } from "react-icons/fa";
+import { FaThumbsUp, FaComment, FaShare, FaEdit } from "react-icons/fa";
 import { formatDistanceToNow } from "date-fns"; // For formatting timestamps
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { SingleCommand } from "./Command";
 import { MdDeleteForever } from "react-icons/md";
 import ConfirmationDialog from "@/components/ui/confirmationDialog";
+import { EditPost } from "./EditPost";
 
 interface PostProps {
   post: {
@@ -43,6 +44,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
   const [showReactions, setShowReactions] = useState(false); // Track reaction dropdown
   const [comment, setComment] = useState(""); // Track user comment
   const [isCommentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [isEditPostDialogOpen, setEditPostDialogOpen] = useState(false);
   const [isDeleteConfirmationDialogOpen, setDeleteConfirmationDialogOpen] =
     useState(false);
 
@@ -194,13 +196,30 @@ const Post: React.FC<PostProps> = ({ post }) => {
           </span>
         </div>
         {post.user.userId === currentUserId && (
-          <div
-            className="ml-auto hover:cursor-pointer"
-            onClick={handleDeleteClick}
-          >
-            <MdDeleteForever />
+          <div className="flex justify-center items-center ml-auto">
+            <div
+              className="ml-auto p-2 text-red-500 hover:text-red-600 hover:cursor-pointer"
+              onClick={() => setEditPostDialogOpen(true)}
+            >
+              <FaEdit />
+            </div>
+            <div
+              className="ml-auto hover:cursor-pointer text-red-500 hover:text-red-600"
+              onClick={handleDeleteClick}
+            >
+              <MdDeleteForever />
+            </div>
           </div>
         )}
+
+        {/* Edit Post Dialog */}
+
+        <EditPost
+          isOpen={isEditPostDialogOpen}
+          setOpen={setEditPostDialogOpen}
+          postId={post.id as Id<"posts">}
+        />
+
         {/* Confirmation Dialog */}
         <ConfirmationDialog
           message="Are you sure you want to delete this post?"
@@ -257,9 +276,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
       <div className="flex flex-col mt-4 relative">
         <div className="p-2 rounded-t-lg">
           <div className="flex justify-between text-gray-600">
-            {reactionCount && reactionCount > 0 && (
-              <span className="text-green-500">{reactionCount} likes</span>
-            )}
+            <span className="text-green-500">{reactionCount} likes</span>
             <span className="text-green-500">{totalComments} comments</span>
             <span className="text-green-500">{0} shares</span>
           </div>
@@ -273,13 +290,23 @@ const Post: React.FC<PostProps> = ({ post }) => {
           >
             <button className="flex flex-col items-center hover:text-blue-500">
               <div className="flex items-center">
-                <FaThumbsUp className="mr-1" />
+                {likedReaction ? (
+                  reactions
+                    .filter(
+                      (reaction) =>
+                        reaction.label.toLowerCase() ===
+                        likedReaction.toLowerCase()
+                    )
+                    .map((reaction) => reaction.emoji)[0] // Access the emoji of the first filtered reaction
+                ) : (
+                  <FaThumbsUp className="mr-1" />
+                )}
                 <span>{likedReaction ? likedReaction : "Like"}</span>
-                {likedReaction && (
+                {/* {likedReaction && (
                   <span className="ml-1">
                     {reactions.find((r) => r.label === likedReaction)?.emoji}
                   </span>
-                )}
+                )} */}
               </div>
             </button>
 

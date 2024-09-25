@@ -126,7 +126,7 @@ export const SingleCommand = ({
                     handleReactionSelect={handleReactionSelect}
                     isReply={false}
                   />
-                  {comment.replies.map((reply) => (
+                  {comment.replies.map((reply: any) => (
                     <div
                       className="ml-12"
                       key={`${reply.comment._id}-${comment.comment._id}`}
