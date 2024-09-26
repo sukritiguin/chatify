@@ -74,6 +74,7 @@ export const createNewMessage = mutation({
   args: {
     conversationId: v.id("conversation"),
     content: v.string(),
+    media: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -85,7 +86,7 @@ export const createNewMessage = mutation({
     await ctx.db.insert("messages", {
       conversationId: args.conversationId,
       content: args.content,
-      // media: [],
+      media: args.media ? args.media : [],
       updatedAt: new Date().toString(),
       createdAt: new Date().toString(),
       senderId: userId,

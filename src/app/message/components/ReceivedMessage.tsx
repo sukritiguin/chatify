@@ -1,11 +1,12 @@
-import Image from "next/image";
 import { FaUserCircle } from "react-icons/fa";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { useMutation, useQueries, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect } from "react";
 import { IoBanOutline } from "react-icons/io5";
+import { IMessage } from "../../../../types/message.interface";
+import { ImageGallery } from "./ImageGallery";
 
 export const convertToTime = (dateString: string): string => {
   const date = new Date(dateString); // Convert string to Date object
@@ -31,13 +32,12 @@ export const ReceivedMessage = ({
   messageId,
   createdAt,
 }: {
-  message: any;
+  message: IMessage;
   content: string;
   messageUserId: Id<"users">;
   messageId: Id<"messages">;
   createdAt: string;
 }) => {
-  const image = "";
 
   let userInfo: {
     name: string;
@@ -60,20 +60,30 @@ export const ReceivedMessage = ({
     markMessageAsRead();
   }, [messageId]); // Dependency array to prevent infinite loop
 
-  if (userRegistedAs?.type == "profile") {
-    const profile = useQuery(api.queries.getUserProfileById, {
-      userId: messageUserId,
-    });
+  const profile = useQuery(
+    api.queries.getUserProfileById,
+    userRegistedAs?.type === "profile"
+      ? {
+          userId: messageUserId,
+        }
+      : "skip"
+  );
 
+  const organization = useQuery(
+    api.queries.getOrganizationByUserId,
+    userRegistedAs?.type === "organization"
+      ? {
+          userId: messageUserId as Id<"users">,
+        }
+      : "skip"
+  );
+
+  if (profile) {
     userInfo = {
       name: profile?.name as string,
       avatar: profile?.profilePhoto as string,
     };
-  } else {
-    const organization = useQuery(api.queries.getOrganizationByUserId, {
-      userId: messageUserId as Id<"users">,
-    });
-
+  } else if (organization) {
     userInfo = {
       name: organization?.name as string,
       avatar: organization?.logo as string,
@@ -98,9 +108,11 @@ export const ReceivedMessage = ({
             <span>This message was deleted</span>
           </span>
         ) : (
-          <span>{content}</span>
+          <span>{!message.media && content}</span>
         )}
-        {image && <Image src="" height={200} width={200} alt="message" />}
+        {message.media && message.isDeleted === undefined && (
+          <ImageGallery media={message.media} />
+        )}
         <span className="text-end text-gray-700 mb-0 text-xs">
           {convertToTime(createdAt)}
         </span>

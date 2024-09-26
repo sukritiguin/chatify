@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { FaUserCircle } from "react-icons/fa";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -9,6 +8,8 @@ import { convertToTime } from "./ReceivedMessage";
 import { useState } from "react";
 import { MessageDialog } from "./MessageDialog";
 import { IoBanOutline } from "react-icons/io5";
+import { IMessage } from "../../../../types/message.interface";
+import { ImageGallery } from "./ImageGallery";
 
 export const SentMessage = ({
   message,
@@ -18,14 +19,13 @@ export const SentMessage = ({
   receiverId,
   messageId,
 }: {
-  message: any;
+  message: IMessage;
   content: string;
   messageUserId: Id<"users">;
   createdAt: string;
   receiverId: Id<"users">;
   messageId: Id<"messages">;
 }) => {
-  const image = "";
   const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
 
   let userInfo: {
@@ -40,20 +40,30 @@ export const SentMessage = ({
     userId: receiverId,
   });
 
-  if (userRegistedAs?.type == "profile") {
-    const profile = useQuery(api.queries.getUserProfileById, {
-      userId: messageUserId,
-    });
+  const profile = useQuery(
+    api.queries.getUserProfileById,
+    userRegistedAs?.type === "profile"
+      ? {
+          userId: messageUserId,
+        }
+      : "skip"
+  );
 
+  const organization = useQuery(
+    api.queries.getOrganizationByUserId,
+    userRegistedAs?.type === "organization"
+      ? {
+          userId: messageUserId as Id<"users">,
+        }
+      : "skip"
+  );
+
+  if (profile) {
     userInfo = {
       name: profile?.name as string,
       avatar: profile?.profilePhoto as string,
     };
-  } else {
-    const organization = useQuery(api.queries.getOrganizationByUserId, {
-      userId: messageUserId as Id<"users">,
-    });
-
+  } else if (organization) {
     userInfo = {
       name: organization?.name as string,
       avatar: organization?.logo as string,
@@ -72,13 +82,16 @@ export const SentMessage = ({
         <span className="font-semibold">{userInfo.name}</span>
         {message.isDeleted === true ? (
           <span className="italic text-gray-500 flex">
-            <IoBanOutline className="mt-1 mr-1"/>
+            <IoBanOutline className="mt-1 mr-1" />
             <span>You deleted this message</span>
           </span>
         ) : (
-          <span>{content}</span>
+          <span>{!message.media && content}</span>
         )}
-        {image && <Image src="" height={200} width={200} alt="message" />}
+        {message.media && message.isDeleted === undefined && (
+          <ImageGallery media={message.media} />
+        )}
+
         <div className="flex ml-auto">
           <span className="text-end text-gray-700 mb-0 text-xs">
             {convertToTime(createdAt)}
@@ -102,7 +115,7 @@ export const SentMessage = ({
         <FaUserCircle className="text-gray-500 w-6 h-6" />
       )}
 
-      {isMessageDialogOpen && (
+      {isMessageDialogOpen && message.isDeleted === undefined && (
         <MessageDialog
           isOpen={isMessageDialogOpen}
           setOpen={setIsMessageDialogOpen}

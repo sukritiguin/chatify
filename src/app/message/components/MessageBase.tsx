@@ -99,21 +99,31 @@ const MessageComponent = ({
 
   const userRegistedAs = useQuery(api.queries.getUserRegistration);
 
-  if (userRegistedAs?.type == "profile") {
-    const profile = useQuery(api.queries.getUserProfileById, {
-      userId: receiver as Id<"users">,
-    });
+  const profile = useQuery(
+    api.queries.getUserProfileById,
+    userRegistedAs?.type == "profile"
+      ? {
+          userId: receiver as Id<"users">,
+        }
+      : "skip"
+  );
 
+  const organization = useQuery(
+    api.queries.getOrganizationByUserId,
+    userRegistedAs?.type == "organization"
+      ? {
+          userId: receiver as Id<"users">,
+        }
+      : "skip"
+  );
+
+  if (profile) {
     userInfo = {
       name: profile?.name as string,
       avatar: profile?.profilePhoto as string,
       profileUrl: `/profile/${profile?.userId}`,
     };
-  } else {
-    const organization = useQuery(api.queries.getOrganizationByUserId, {
-      userId: receiver as Id<"users">,
-    });
-
+  } else if (organization) {
     userInfo = {
       name: organization?.name as string,
       avatar: organization?.logo as string,
@@ -209,6 +219,8 @@ const MessageComponent = ({
             isOpen={isModalOpen}
             onClose={setIsModalOpen}
             setFiles={setFiles} // Pass the setFiles state to the modal
+            files={files}
+            conversationId={conversationId}
           />
         )}
         {/* Message History */}

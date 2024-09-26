@@ -1,22 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { Dialog } from "@/components/ui/dialog"; // Ensure you have this in your ShadCN setup
-import { AiOutlineClose } from "react-icons/ai";
+import {
+  Dialog,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"; // Ensure you have this in your ShadCN setup
 import { DialogContent } from "@radix-ui/react-dialog";
 import { FaTrash } from "react-icons/fa";
 import Image from "next/image";
+import { uploadImageToCloudinary } from "@/lib/cloudinary.utility";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 const ImageUploadModal = ({
   isOpen,
   onClose,
   setFiles,
+  files,
+  conversationId,
 }: {
   isOpen: any;
   onClose: any;
   setFiles: any;
+  files: File[];
+  conversationId: Id<"conversation">;
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [showWarning, setShowWarning] = useState(false); // State for showing warning
+
+  const createNewMessage = useMutation(api.queries.createNewMessage);
 
   const handleFileChange = (e: any) => {
     const files = Array.from(e.target.files);
@@ -28,9 +42,30 @@ const ImageUploadModal = ({
     setSelectedFiles((prevFiles: any) => [...prevFiles, ...files]);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     setFiles((prevFiles: any) => [...prevFiles, ...selectedFiles]); // Update the parent state with the new files
     onClose(); // Close the modal after upload
+
+    const uploadedFileUrls = [];
+
+    for (const file of selectedFiles) {
+      const url = await uploadImageToCloudinary(file);
+      uploadedFileUrls.push(url);
+    }
+
+    console.log("Uploaded files: ", {
+      files: files,
+      selectedFiles: selectedFiles,
+      uploadedFileUrls: uploadedFileUrls,
+    });
+
+    await createNewMessage({
+      media: uploadedFileUrls,
+      content: "You send image files",
+      conversationId: conversationId,
+    });
+
+    setFiles([]);
   };
 
   const handleRemoveFile = (fileToRemove: File) => {
@@ -42,12 +77,16 @@ const ImageUploadModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-white rounded-lg shadow-lg max-w-md mx-auto p-6">
-        <div className="flex justify-between items-center border-b pb-4">
+        <DialogHeader>
+          <DialogTitle>Upload Images</DialogTitle>
+          <DialogDescription></DialogDescription>
+        </DialogHeader>
+        {/* <div className="flex justify-between items-center border-b pb-4">
           <h2 className="text-xl font-semibold text-gray-800">Upload Images</h2>
           <button onClick={onClose}>
             <AiOutlineClose className="w-6 h-6 text-gray-600 hover:text-gray-800 transition-colors" />
           </button>
-        </div>
+        </div> */}
         <div className="mt-4">
           <input
             type="file"
@@ -97,7 +136,7 @@ const ImageUploadModal = ({
             }`}
             disabled={selectedFiles.length === 0} // Disable if no files are selected
           >
-            Upload
+            Send
           </button>
         </div>
       </DialogContent>
