@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { AiOutlinePaperClip } from "react-icons/ai";
 import { BsEmojiSmile } from "react-icons/bs";
@@ -22,11 +22,49 @@ import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 
+export const formatDateForWhatsApp = (dateString: string) => {
+  const inputDate = new Date(dateString);
+  const today = new Date();
+
+  // Remove the time part for accurate comparison of just dates
+  const inputDateOnly = new Date(
+    inputDate.getFullYear(),
+    inputDate.getMonth(),
+    inputDate.getDate()
+  );
+  const todayOnly = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+
+  // Calculate the difference in days between input date and today (ignoring time)
+  const diffInTime = todayOnly.getTime() - inputDateOnly.getTime();
+  const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
+
+  // Format date as DD/MM/YYYY
+  const day = inputDate.getDate();
+  const month = inputDate.getMonth() + 1; // Months are zero-based
+  const year = inputDate.getFullYear();
+
+  console.log("difference: ", diffInDays, dateString);
+
+  if (diffInDays === 0) {
+    return "Today"; // Same day
+  } else if (diffInDays === 1) {
+    return "Yesterday"; // One day before
+  } else {
+    return `${day < 10 ? "0" + day : day}/${month < 10 ? "0" + month : month}/${year}`; // DD/MM/YYYY
+  }
+};
+
 const MessageComponent = ({
   conversationId,
 }: {
   conversationId: Id<"conversation">;
 }) => {
+  // const [currentDate, setCurrentDate] = useState("");
+  let currentDate = "";
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -132,16 +170,28 @@ const MessageComponent = ({
     setMessage("");
   };
 
+  // Inside the component
+  // useEffect(() => {
+  //   if (allMessages && allMessages.length > 0) {
+  //     const lastMessageDate = allMessages[allMessages.length - 1].createdAt;
+  //     const formattedDate = formatDateForWhatsApp(lastMessageDate);
+  //     setCurrentDate(formattedDate);
+  //   }
+  // }, [allMessages]);
+
   const router = useRouter();
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl min-h-screen mx-auto my-0">
       {/* Message Card */}
       <Card>
         {/* Header */}
         <CardHeader className="flex justify-between items-center p-4 bg-gray-100">
-          <div className="flex items-center space-x-2 hover:underline hover:cursor-pointer"
-            onClick={()=>{router.push(userInfo.profileUrl)}}
+          <div
+            className="flex items-center space-x-2 hover:underline hover:cursor-pointer"
+            onClick={() => {
+              router.push(userInfo.profileUrl);
+            }}
           >
             {userInfo.avatar ? (
               <Avatar className="w-6 h-6">
@@ -164,23 +214,38 @@ const MessageComponent = ({
           />
         )}
         {/* Message History */}
-        <CardContent className="space-y-4 h-64 overflow-y-auto p-4">
+        <CardContent className="space-y-4 h-[65vh] overflow-y-auto p-4">
           {allMessages &&
-            allMessages.map((message, index) => (
-              <div key={message._id}>
-                {message.senderId == sender ? (
-                  <SentMessage
-                    content={message.content}
-                    messageUserId={message.senderId}
-                  />
-                ) : (
-                  <ReceivedMessage
-                    content={message.content}
-                    messageUserId={message.senderId}
-                  />
-                )}
-              </div>
-            ))}
+            allMessages.map((message) => {
+              const messageDate = formatDateForWhatsApp(message.createdAt);
+              const shouldShowDate = currentDate !== messageDate;
+              currentDate = messageDate;
+
+              return (
+                <div key={message._id}>
+                  {shouldShowDate && (
+                    <div className="flex justify-center items-center my-4">
+                      <span className="text-sm bg-green-100 text-gray-600 rounded-full px-3 py-1">
+                        {messageDate}
+                      </span>
+                    </div>
+                  )}
+                  {message.senderId == sender ? (
+                    <SentMessage
+                      content={message.content}
+                      messageUserId={message.senderId}
+                      createdAt={message.createdAt}
+                    />
+                  ) : (
+                    <ReceivedMessage
+                      content={message.content}
+                      messageUserId={message.senderId}
+                      createdAt={message.createdAt}
+                    />
+                  )}
+                </div>
+              );
+            })}
         </CardContent>
 
         {/* Input Section */}

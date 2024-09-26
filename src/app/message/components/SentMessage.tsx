@@ -4,13 +4,16 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { convertToTime } from "./ReceivedMessage";
 
 export const SentMessage = ({
   content,
   messageUserId,
+  createdAt,
 }: {
   content: string;
   messageUserId: Id<"users">;
+  createdAt: string;
 }) => {
   const image = "";
 
@@ -47,6 +50,9 @@ export const SentMessage = ({
         <span className="font-semibold">{userInfo.name}</span>
         <span>{content}</span>
         {image && <Image src="" height={200} width={200} alt="message" />}
+        <span className="text-end text-gray-700 mb-0 text-xs">
+          {convertToTime(createdAt)}
+        </span>
       </div>
 
       {userInfo.avatar ? (

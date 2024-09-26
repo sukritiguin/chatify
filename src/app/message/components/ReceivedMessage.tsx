@@ -5,12 +5,31 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+export const convertToTime = (dateString: string): string => {
+  const date = new Date(dateString); // Convert string to Date object
+
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12; // Convert to 12-hour format
+  hours = hours ? hours : 12; // If hour is 0, set to 12 (midnight)
+  const minutesString =
+    minutes < 10 ? "0" + minutes.toString() : minutes.toString(); // Add leading 0 to minutes
+
+  const timeString = hours + ":" + minutesString + " " + ampm;
+
+  return timeString;
+};
+
 export const ReceivedMessage = ({
   content,
   messageUserId,
+  createdAt,
 }: {
   content: string;
   messageUserId: Id<"users">;
+  createdAt: string;
 }) => {
   const image = "";
 
@@ -55,6 +74,9 @@ export const ReceivedMessage = ({
         <span className="font-semibold">{userInfo.name}</span>
         <span>{content}</span>
         {image && <Image src="" height={200} width={200} alt="message" />}
+        <span className="text-end text-gray-700 mb-0 text-xs">
+          {convertToTime(createdAt)}
+        </span>
       </div>
     </div>
   );
