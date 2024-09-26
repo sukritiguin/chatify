@@ -86,7 +86,10 @@ export const SentMessage = ({
             <span>You deleted this message</span>
           </span>
         ) : (
-          <span>{!message.media && content}</span>
+          <span>
+            {(message.media === undefined || message.media.length === 0) &&
+              content}
+          </span>
         )}
         {message.media && message.isDeleted === undefined && (
           <ImageGallery media={message.media} />

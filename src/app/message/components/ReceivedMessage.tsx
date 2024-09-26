@@ -38,7 +38,6 @@ export const ReceivedMessage = ({
   messageId: Id<"messages">;
   createdAt: string;
 }) => {
-
   let userInfo: {
     name: string;
     avatar: string;
@@ -108,7 +107,10 @@ export const ReceivedMessage = ({
             <span>This message was deleted</span>
           </span>
         ) : (
-          <span>{!message.media && content}</span>
+          <span>
+            {(message.media === undefined || message.media.length === 0) &&
+              content}
+          </span>
         )}
         {message.media && message.isDeleted === undefined && (
           <ImageGallery media={message.media} />
