@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { FaUserCircle } from "react-icons/fa";
+import { IoIosCheckmarkCircle } from "react-icons/io";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -10,10 +11,14 @@ export const SentMessage = ({
   content,
   messageUserId,
   createdAt,
+  receiverId,
+  messageId,
 }: {
   content: string;
   messageUserId: Id<"users">;
   createdAt: string;
+  receiverId: Id<"users">;
+  messageId: Id<"messages">;
 }) => {
   const image = "";
 
@@ -23,6 +28,11 @@ export const SentMessage = ({
   } = { name: "", avatar: "" };
 
   const userRegistedAs = useQuery(api.queries.getUserRegistration);
+
+  const isMessageRead = useQuery(api.queries.isMessageRead, {
+    messageId: messageId,
+    userId: receiverId,
+  });
 
   if (userRegistedAs?.type == "profile") {
     const profile = useQuery(api.queries.getUserProfileById, {
@@ -50,9 +60,16 @@ export const SentMessage = ({
         <span className="font-semibold">{userInfo.name}</span>
         <span>{content}</span>
         {image && <Image src="" height={200} width={200} alt="message" />}
-        <span className="text-end text-gray-700 mb-0 text-xs">
-          {convertToTime(createdAt)}
-        </span>
+        <div className="flex ml-auto">
+          <span className="text-end text-gray-700 mb-0 text-xs">
+            {convertToTime(createdAt)}
+          </span>
+          <span
+            className={`text-end ${!isMessageRead ? "text-green-700" : "text-blue-700"} ml-1 text-sm`}
+          >
+            <IoIosCheckmarkCircle className="" />
+          </span>
+        </div>
       </div>
 
       {userInfo.avatar ? (

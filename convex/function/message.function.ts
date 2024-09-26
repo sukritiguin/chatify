@@ -110,3 +110,63 @@ export const getMessageByConversationId = query({
     return messages;
   },
 });
+
+export const readMessage = mutation({
+  args: {
+    userId: v.id("users"),
+    messageId: v.id("messages"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    const check = await ctx.db
+      .query("messageReads")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("messageId"), args.messageId),
+          q.eq(q.field("userId"), args.userId)
+        )
+      )
+      .first();
+
+    console.log("Check result: ", check);
+
+    if (!check) {
+      await ctx.db.insert("messageReads", {
+        userId: args.userId,
+        messageId: args.messageId,
+        readAt: new Date().toString(),
+      });
+    }
+  },
+});
+
+export const isMessageRead = query({
+  args: {
+    userId: v.id("users"),
+    messageId: v.id("messages"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    const check = await ctx.db
+      .query("messageReads")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("messageId"), args.messageId),
+          q.eq(q.field("userId"), args.userId)
+        )
+      )
+      .first();
+
+    return check ? true : false;
+  },
+});

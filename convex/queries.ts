@@ -38,6 +38,8 @@ import {
   getExistingConversationByConversationId,
   createNewMessage,
   getMessageByConversationId,
+  readMessage,
+  isMessageRead,
 } from "./function/message.function";
 
 export {
@@ -70,4 +72,6 @@ export {
   getExistingConversationByConversationId,
   createNewMessage,
   getMessageByConversationId,
+  readMessage,
+  isMessageRead,
 };

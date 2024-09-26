@@ -1,9 +1,10 @@
 import Image from "next/image";
 import { FaUserCircle } from "react-icons/fa";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useMutation, useQueries, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect } from "react";
 
 export const convertToTime = (dateString: string): string => {
   const date = new Date(dateString); // Convert string to Date object
@@ -25,10 +26,12 @@ export const convertToTime = (dateString: string): string => {
 export const ReceivedMessage = ({
   content,
   messageUserId,
+  messageId,
   createdAt,
 }: {
   content: string;
   messageUserId: Id<"users">;
+  messageId: Id<"messages">;
   createdAt: string;
 }) => {
   const image = "";
@@ -39,6 +42,20 @@ export const ReceivedMessage = ({
   } = { name: "", avatar: "" };
 
   const userRegistedAs = useQuery(api.queries.getUserRegistration);
+  const currentUserId = useQuery(api.queries.currentUserId);
+
+  const readMessage = useMutation(api.queries.readMessage);
+
+  const readCurrentMessage = async () => {
+    readMessage({ userId: currentUserId as Id<"users">, messageId: messageId });
+  };
+
+  useEffect(() => {
+    const markMessageAsRead = async () => {
+      await readCurrentMessage();
+    };
+    markMessageAsRead();
+  }, [messageId]); // Dependency array to prevent infinite loop
 
   if (userRegistedAs?.type == "profile") {
     const profile = useQuery(api.queries.getUserProfileById, {

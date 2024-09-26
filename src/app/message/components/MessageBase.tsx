@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { AiOutlinePaperClip } from "react-icons/ai";
 import { BsEmojiSmile } from "react-icons/bs";
@@ -46,8 +46,6 @@ export const formatDateForWhatsApp = (dateString: string) => {
   const day = inputDate.getDate();
   const month = inputDate.getMonth() + 1; // Months are zero-based
   const year = inputDate.getFullYear();
-
-  console.log("difference: ", diffInDays, dateString);
 
   if (diffInDays === 0) {
     return "Today"; // Same day
@@ -235,11 +233,14 @@ const MessageComponent = ({
                       content={message.content}
                       messageUserId={message.senderId}
                       createdAt={message.createdAt}
+                      receiverId={receiver as Id<"users">}
+                      messageId={message._id}
                     />
                   ) : (
                     <ReceivedMessage
                       content={message.content}
                       messageUserId={message.senderId}
+                      messageId={message._id}
                       createdAt={message.createdAt}
                     />
                   )}
