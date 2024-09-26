@@ -40,6 +40,7 @@ import {
   getMessageByConversationId,
   readMessage,
   isMessageRead,
+  deleteMessage,
 } from "./function/message.function";
 
 export {
@@ -74,4 +75,5 @@ export {
   getMessageByConversationId,
   readMessage,
   isMessageRead,
+  deleteMessage,
 };

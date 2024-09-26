@@ -170,3 +170,24 @@ export const isMessageRead = query({
     return check ? true : false;
   },
 });
+
+export const deleteMessage = mutation({
+  args: {
+    messageId: v.id("messages"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    const message = await ctx.db.get(args.messageId);
+
+    if (message?.senderId !== userId) {
+      throw new Error("You are not allowed to delete this message");
+    }
+
+    await ctx.db.delete(args.messageId);
+  },
+});

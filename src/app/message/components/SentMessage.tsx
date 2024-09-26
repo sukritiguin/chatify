@@ -6,6 +6,8 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { convertToTime } from "./ReceivedMessage";
+import { useState } from "react";
+import { MessageDialog } from "./MessageDialog";
 
 export const SentMessage = ({
   content,
@@ -21,6 +23,7 @@ export const SentMessage = ({
   messageId: Id<"messages">;
 }) => {
   const image = "";
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
 
   let userInfo: {
     name: string;
@@ -56,7 +59,13 @@ export const SentMessage = ({
 
   return (
     <div className="flex items-start space-x-2 justify-end">
-      <div className="flex flex-col bg-gray-200 px-3 py-2 rounded-lg text-sm text-gray-800">
+      <div
+        className="flex flex-col bg-gray-200 px-3 py-2 rounded-lg text-sm text-gray-800"
+        onContextMenu={(event) => {
+          event.preventDefault();
+          setIsMessageDialogOpen(true);
+        }}
+      >
         <span className="font-semibold">{userInfo.name}</span>
         <span>{content}</span>
         {image && <Image src="" height={200} width={200} alt="message" />}
@@ -79,6 +88,14 @@ export const SentMessage = ({
         </Avatar>
       ) : (
         <FaUserCircle className="text-gray-500 w-6 h-6" />
+      )}
+
+      {isMessageDialogOpen && (
+        <MessageDialog
+          isOpen={isMessageDialogOpen}
+          setOpen={setIsMessageDialogOpen}
+          messageId={messageId}
+        />
       )}
     </div>
   );
