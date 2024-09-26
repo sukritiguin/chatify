@@ -22,6 +22,26 @@ export const getOrganization = query({
   },
 });
 
+export const getOrganizationByUserId = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    // Return null if no user is logged in
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    // Fetch the user profile
+    const profile = await ctx.db
+      .query("organizations")
+      .filter((q) => q.eq(q.field("adminUserId"), args.userId))
+      .first();
+
+    return profile || null;
+  },
+});
+
 export const getOrganizationById = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, args) => {

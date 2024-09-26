@@ -1,4 +1,5 @@
-import { useState } from "react";
+"use client";
+import { useEffect, useState } from "react";
 
 import Image from "next/image";
 import { FaPen } from "react-icons/fa";
@@ -11,6 +12,11 @@ import EducationCard from "./EducationCard";
 import ExperienceCard from "./ExperienceCard";
 
 import { Profile } from "../../../../types/profile.interface";
+import { AiFillMessage } from "react-icons/ai";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { useRouter } from "next/navigation";
 
 // Utility function to format date and calculate duration
 const formatDateRange = (startDate: string, endDate?: string) => {
@@ -40,7 +46,34 @@ export const LinkedInProfileCard = ({
   profile: Profile;
   profileId: string;
 }) => {
+  const router = useRouter(); // Get router instance
   const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false);
+  const [conversationId, setConversationId] = useState<Id<"conversation">>();
+
+  const existingConversation = useQuery(api.queries.checkExistingConversation, {
+    receiverId: profile.userId as Id<"users">,
+  });
+
+  const createNewConversation = useMutation(api.queries.addNewConversation);
+
+  const createNewConversationFun = async () => {
+    try {
+      const newConversationId = await createNewConversation({
+        receiverId: profile.userId as Id<"users">,
+      });
+      setConversationId(newConversationId); // Set the resolved value
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (existingConversation) {
+      setConversationId(existingConversation);
+    } else if (existingConversation !== undefined) {
+      createNewConversationFun();
+    }
+  }, [existingConversation, profile.userId, createNewConversation]);
 
   return (
     <>
@@ -55,21 +88,23 @@ export const LinkedInProfileCard = ({
             className="rounded-lg w-full"
           />
           {/* Edit Icon */}
-          {profileId && <div className="">
-            <div
-              className="absolute right-4 top-4 cursor-pointer mt-1 mr-1"
-              onClick={() => setIsBannerDialogOpen(true)}
-            >
-              <FaPen
-                className="text-blue-500 hover:text-blue-800 bg-white p-2 rounded-full"
-                size={24}
+          {profileId && (
+            <div className="">
+              <div
+                className="absolute right-4 top-4 cursor-pointer mt-1 mr-1"
+                onClick={() => setIsBannerDialogOpen(true)}
+              >
+                <FaPen
+                  className="text-blue-500 hover:text-blue-800 bg-white p-2 rounded-full"
+                  size={24}
+                />
+              </div>
+              <BannerUpdate
+                isOpen={isBannerDialogOpen}
+                setIsOpen={setIsBannerDialogOpen}
               />
             </div>
-            <BannerUpdate
-              isOpen={isBannerDialogOpen}
-              setIsOpen={setIsBannerDialogOpen}
-            />
-          </div>}
+          )}
           {/* Profile Photo (absolute positioned) */}
           <div className="flex -mt-12 ml-2 left-8 -bottom-12">
             <Image
@@ -84,6 +119,15 @@ export const LinkedInProfileCard = ({
           <div className="flex flex-col items-start">
             <h2 className="text-black text-3xl font-bold">{profile.name}</h2>
             <p className="text-black">{profile?.bio}</p>
+          </div>
+          <div
+            className="flex text-3xl text-blue-600 hover:text-blue-700 hover:cursor-pointer"
+            onClick={() => {
+              console.log("On Click start conversation: ", conversationId);
+              router.push(`/message/${conversationId}`);
+            }}
+          >
+            {!profileId && <AiFillMessage />}
           </div>
           {/* Experience Section */}
           <ExperienceCard

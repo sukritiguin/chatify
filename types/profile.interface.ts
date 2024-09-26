@@ -1,3 +1,5 @@
+import { Id } from "../convex/_generated/dataModel";
+
 export interface Skill {
   skill: string;
   level?: "Beginner" | "Intermediate" | "Advanced" | "Proficient" | "Expert" | "Master" | ""; // e.g., "Beginner", "Intermediate", "Expert"
@@ -34,6 +36,7 @@ export interface Profile {
   experiences?: Experience[];
   skills?: Skill[];
   socials?: Socials;
+  userId: Id<"users">
 }
 
 export interface UserProfile {

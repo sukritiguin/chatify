@@ -50,6 +50,7 @@ export const getUserProfile = query({
 export const insertProfile = mutation({
   args: {
     data: v.object({
+      userId: v.id("users"),
       name: v.string(),
       coverPhoto: v.optional(v.string()),
       profilePhoto: v.optional(v.string()),

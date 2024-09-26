@@ -8,6 +8,7 @@ import { Profile } from "../../../types/profile.interface";
 
 // import ProfileCard from "./components/ProfileCard";
 import { LinkedInProfileCard } from "./components/LinkedInProfileCard";
+import { Id } from "../../../convex/_generated/dataModel";
 
 // Function to map Convex data to the UserProfile interface
 export function mapConvexDataToUserProfile(profileData: any): Profile {
@@ -25,6 +26,7 @@ export function mapConvexDataToUserProfile(profileData: any): Profile {
         linkedIn: "",
         twitter: "",
       },
+      userId: "" as Id<"users">,
     };
   }
   return {
@@ -35,6 +37,7 @@ export function mapConvexDataToUserProfile(profileData: any): Profile {
     bio: profileData.bio ?? "", // Handle optional fields with fallback
     coverPhoto: profileData.coverPhoto ?? "",
     profilePhoto: profileData.profilePhoto ?? "",
+    userId: profileData.userId,
     educations:
       profileData.educations?.map((education: any) => ({
         institute: education.institute,
