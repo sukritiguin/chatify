@@ -5,6 +5,7 @@ import { useMutation, useQueries, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect } from "react";
+import { IoBanOutline } from "react-icons/io5";
 
 export const convertToTime = (dateString: string): string => {
   const date = new Date(dateString); // Convert string to Date object
@@ -24,11 +25,13 @@ export const convertToTime = (dateString: string): string => {
 };
 
 export const ReceivedMessage = ({
+  message,
   content,
   messageUserId,
   messageId,
   createdAt,
 }: {
+  message: any;
   content: string;
   messageUserId: Id<"users">;
   messageId: Id<"messages">;
@@ -89,7 +92,14 @@ export const ReceivedMessage = ({
       )}
       <div className="flex flex-col bg-gray-50 px-3 py-2 rounded-lg text-sm text-gray-800">
         <span className="font-semibold">{userInfo.name}</span>
-        <span>{content}</span>
+        {message.isDeleted === true ? (
+          <span className="italic text-gray-500 flex">
+            <IoBanOutline className="mt-1 mr-1" />
+            <span>This message was deleted</span>
+          </span>
+        ) : (
+          <span>{content}</span>
+        )}
         {image && <Image src="" height={200} width={200} alt="message" />}
         <span className="text-end text-gray-700 mb-0 text-xs">
           {convertToTime(createdAt)}

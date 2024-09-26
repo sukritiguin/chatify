@@ -8,14 +8,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { convertToTime } from "./ReceivedMessage";
 import { useState } from "react";
 import { MessageDialog } from "./MessageDialog";
+import { IoBanOutline } from "react-icons/io5";
 
 export const SentMessage = ({
+  message,
   content,
   messageUserId,
   createdAt,
   receiverId,
   messageId,
 }: {
+  message: any;
   content: string;
   messageUserId: Id<"users">;
   createdAt: string;
@@ -67,17 +70,26 @@ export const SentMessage = ({
         }}
       >
         <span className="font-semibold">{userInfo.name}</span>
-        <span>{content}</span>
+        {message.isDeleted === true ? (
+          <span className="italic text-gray-500 flex">
+            <IoBanOutline className="mt-1 mr-1"/>
+            <span>You deleted this message</span>
+          </span>
+        ) : (
+          <span>{content}</span>
+        )}
         {image && <Image src="" height={200} width={200} alt="message" />}
         <div className="flex ml-auto">
           <span className="text-end text-gray-700 mb-0 text-xs">
             {convertToTime(createdAt)}
           </span>
-          <span
-            className={`text-end ${!isMessageRead ? "text-green-700" : "text-blue-700"} ml-1 text-sm`}
-          >
-            <IoIosCheckmarkCircle className="" />
-          </span>
+          {!(message.isDeleted === true) && (
+            <span
+              className={`text-end ${!isMessageRead ? "text-green-700" : "text-blue-700"} ml-1 text-sm`}
+            >
+              <IoIosCheckmarkCircle className="" />
+            </span>
+          )}
         </div>
       </div>
 

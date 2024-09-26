@@ -188,6 +188,8 @@ export const deleteMessage = mutation({
       throw new Error("You are not allowed to delete this message");
     }
 
-    await ctx.db.delete(args.messageId);
+    await ctx.db.patch(args.messageId, {
+      isDeleted: true,
+    });
   },
 });

@@ -230,6 +230,7 @@ const MessageComponent = ({
                   )}
                   {message.senderId == sender ? (
                     <SentMessage
+                      message={message}
                       content={message.content}
                       messageUserId={message.senderId}
                       createdAt={message.createdAt}
@@ -238,6 +239,7 @@ const MessageComponent = ({
                     />
                   ) : (
                     <ReceivedMessage
+                      message={message}
                       content={message.content}
                       messageUserId={message.senderId}
                       messageId={message._id}
