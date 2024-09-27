@@ -48,7 +48,7 @@ export const SignUpCard = ({ setState }: signUpCardProps) => {
         setError("Something went wrong!");
       })
       .finally(() => {
-        setPage("otpauth")
+        // setPage("otpauth")
         setPending(false);
       });
   };
