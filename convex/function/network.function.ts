@@ -133,3 +133,49 @@ export const getStatusOfConnectionRequest = query({
     return data;
   },
 });
+
+export const getAllConnectionRequests = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const connections = await ctx.db
+      .query("connection")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("receiver"), userId),
+          q.eq(q.field("status"), "pending")
+        )
+      )
+      .collect();
+
+    return connections;
+  },
+});
+
+export const acceptOrRejectConnectionRequest = mutation({
+  args: {
+    connectionId: v.id("connection"),
+    status: v.union(v.literal("accepted"), v.literal("rejected")),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    if (args.status === "rejected") {
+      await ctx.db.delete(args.connectionId);
+      return;
+    }
+
+    await ctx.db.patch(args.connectionId, {
+      status: args.status,
+    });
+  },
+});

@@ -47,6 +47,8 @@ import {
   getPeopleYouMayKnow,
   sendConnectRequest,
   getStatusOfConnectionRequest,
+  getAllConnectionRequests,
+  acceptOrRejectConnectionRequest
 } from "./function/network.function";
 
 export {
@@ -85,4 +87,6 @@ export {
   getPeopleYouMayKnow,
   sendConnectRequest,
   getStatusOfConnectionRequest,
+  getAllConnectionRequests,
+  acceptOrRejectConnectionRequest
 };
