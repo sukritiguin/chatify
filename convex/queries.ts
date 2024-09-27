@@ -43,7 +43,11 @@ import {
   deleteMessage,
 } from "./function/message.function";
 
-import { getPeopleYouMayKnow } from "./function/network.function";
+import {
+  getPeopleYouMayKnow,
+  sendConnectRequest,
+  getStatusOfConnectionRequest,
+} from "./function/network.function";
 
 export {
   currentUserId,
@@ -79,4 +83,6 @@ export {
   isMessageRead,
   deleteMessage,
   getPeopleYouMayKnow,
+  sendConnectRequest,
+  getStatusOfConnectionRequest,
 };

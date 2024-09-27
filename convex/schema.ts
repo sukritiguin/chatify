@@ -234,7 +234,6 @@ const conversation = defineTable({
   secondUser: v.id("users"),
 });
 
-
 const messages = defineTable({
   conversationId: v.id("conversation"), // The conversation this message belongs to
   senderId: v.id("users"), // The user who sent the message
@@ -266,6 +265,16 @@ const messageReads = defineTable({
   readAt: v.string(), // Timestamp when the message was read
 });
 
+const connection = defineTable({
+  sender: v.id("users"),
+  receiver: v.id("users"),
+  status: v.union(
+    v.literal("pending"),
+    v.literal("accepted"),
+    v.literal("rejected")
+  ),
+});
+
 const schema = defineSchema({
   ...authTables,
   profile,
@@ -285,6 +294,8 @@ const schema = defineSchema({
   messages,
   conversation,
   conversationParticipant,
+
+  connection,
 });
 
 export default schema;

@@ -1,4 +1,5 @@
-import { query } from "../_generated/server";
+import { v } from "convex/values";
+import { mutation, query } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getPeopleYouMayKnow = query({
@@ -90,5 +91,45 @@ export const getPeopleYouMayKnow = query({
     }
 
     return Object.fromEntries(suggestedProfiles.entries());
+  },
+});
+
+export const sendConnectRequest = mutation({
+  args: { connectionRequestReceiverUserId: v.id("users") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    await ctx.db.insert("connection", {
+      sender: userId,
+      receiver: args.connectionRequestReceiverUserId,
+      status: "pending",
+    });
+  },
+});
+
+export const getStatusOfConnectionRequest = query({
+  args: { connectionRequestReceiverUserId: v.id("users") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const data = await ctx.db
+      .query("connection")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("sender"), userId),
+          q.eq(q.field("receiver"), args.connectionRequestReceiverUserId)
+        )
+      )
+      .first();
+
+    return data;
   },
 });
