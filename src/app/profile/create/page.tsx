@@ -37,12 +37,11 @@ import { api } from "../../../../convex/_generated/api";
 import {
   Education,
   Experience,
-  Profile,
+  ProfileInsertInterface,
   Skill,
 } from "../../../../types/profile.interface";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/ui/Loader";
-import { Id } from "../../../../convex/_generated/dataModel";
 
 type RemoveEducationType = (index: number) => void;
 type HandleEducationChangeType = (
@@ -58,7 +57,7 @@ type HandleExperienceChangeType = (
 
 const CreateProfile = () => {
   const router = useRouter(); // Get router instance
-  const [profile, setProfile] = useState<Profile>({
+  const [profile, setProfile] = useState<ProfileInsertInterface>({
     name: "",
     coverPhoto: "",
     profilePhoto: "",
@@ -69,7 +68,7 @@ const CreateProfile = () => {
     ],
     skills: [{ skill: "", level: "" }],
     socials: { linkedIn: "", github: "", twitter: "" },
-    userId: "" as Id<"users">,
+    // userId: "" as Id<"users">,
   });
 
   const insertProfile = useMutation(api.queries.insertProfile);

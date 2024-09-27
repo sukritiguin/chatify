@@ -43,6 +43,8 @@ import {
   deleteMessage,
 } from "./function/message.function";
 
+import { getPeopleYouMayKnow } from "./function/network.function";
+
 export {
   currentUserId,
   getUserProfile,
@@ -76,4 +78,5 @@ export {
   readMessage,
   isMessageRead,
   deleteMessage,
+  getPeopleYouMayKnow,
 };
