@@ -10,8 +10,8 @@ const OrganizationIdPage = ({
 }: {
   params: { organizationId: string };
 }) => {
-  const organization = useQuery(api.queries.getOrganizationById, {
-    organizationId: params.organizationId as Id<"organizations">,
+  const organization = useQuery(api.queries.getOrganizationByUserId, {
+    userId: params.organizationId as Id<"users">
   });
 
   const data = {

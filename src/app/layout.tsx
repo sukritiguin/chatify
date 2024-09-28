@@ -3,17 +3,10 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
-import {
-  FaHome,
-  FaBriefcase,
-  FaBell,
-  FaEnvelope,
-  FaUsers,
-} from "react-icons/fa";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { Button } from "@/components/ui/button"; // Assuming Shadcn's Button component
+import { LeftSideBar } from "./components/leftsidebar.layout";
+import { Header } from "./components/header.layout";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -36,6 +29,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  // const commonDetails = useQuery(api.queries.getCommonDetails)
+
   return (
     <ConvexAuthNextjsServerProvider>
       <html lang="en">
@@ -45,108 +41,12 @@ export default function RootLayout({
           <ConvexClientProvider>
             <div className="flex flex-col min-h-screen">
               {/* Header */}
-              <header className="bg-white shadow-sm sticky top-0 z-50">
-                <div className="container mx-auto flex items-center justify-between py-4 px-6">
-                  {/* Logo and Search Bar */}
-                  <div className="flex items-center space-x-4">
-                    <Link href="/">
-                      <div className="text-xl font-bold text-blue-600 cursor-pointer uppercase">
-                        Chatify
-                      </div>
-                    </Link>
-                    <Input
-                      type="text"
-                      placeholder="Search..."
-                      className="w-80"
-                    />
-                  </div>
-
-                  {/* Icons and Avatar */}
-                  <div className="flex items-center space-x-6">
-                    <Link href="/">
-                      <FaHome className="text-gray-600 w-6 h-6 cursor-pointer" />
-                    </Link>
-                    <Link href="/network">
-                      <FaUsers className="text-gray-600 w-6 h-6 cursor-pointer" />
-                    </Link>
-                    <Link href="/jobs">
-                      <FaBriefcase className="text-gray-600 w-6 h-6 cursor-pointer" />
-                    </Link>
-                    <Link href="/notifications">
-                      <FaBell className="text-gray-600 w-6 h-6 cursor-pointer" />
-                    </Link>
-                    <Link href="/message">
-                      <FaEnvelope className="text-gray-600 w-6 h-6 cursor-pointer" />
-                    </Link>
-                    <Link href="/profile">
-                      <Avatar>
-                        <AvatarImage
-                          src="https://via.placeholder.com/150"
-                          alt="User"
-                        />
-                        <AvatarFallback>U</AvatarFallback>
-                      </Avatar>
-                    </Link>
-                  </div>
-                </div>
-              </header>
+              <Header />
 
               {/* Main Layout Body */}
               <div className="flex-grow container mx-auto flex py-6 space-x-6">
                 {/* Left Sidebar */}
-                <aside className="w-64 hidden md:block">
-                  <div className="bg-white rounded-lg shadow p-4">
-                    <div className="flex items-center space-x-4 mb-6">
-                      <Avatar>
-                        <AvatarImage
-                          src="https://via.placeholder.com/150"
-                          alt="User"
-                        />
-                        <AvatarFallback>U</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="text-lg font-semibold">John Doe</h3>
-                        <p className="text-sm text-gray-500">
-                          Software Engineer
-                        </p>
-                      </div>
-                    </div>
-                    <nav className="space-y-2">
-                      <Link href="/">
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start"
-                        >
-                          Home
-                        </Button>
-                      </Link>
-                      <Link href="/network">
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start"
-                        >
-                          My Network
-                        </Button>
-                      </Link>
-                      <Link href="/jobs">
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start"
-                        >
-                          Jobs
-                        </Button>
-                      </Link>
-                      <Link href="/messages">
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start"
-                        >
-                          Messaging
-                        </Button>
-                      </Link>
-                    </nav>
-                  </div>
-                </aside>
+                <LeftSideBar />
 
                 {/* Main Content Area */}
                 <main className="flex-grow bg-gray-100 text-gray-900 rounded-lg p-6 shadow">

@@ -52,6 +52,8 @@ import {
   acceptOrRejectConnectionRequest,
 } from "./function/network.function";
 
+import { getCommonDetails, allProfileAndOrganizationProfile } from "./function/common.function";
+
 export {
   currentUserId,
   getUserProfile,
@@ -91,4 +93,6 @@ export {
   getStatusOfConnectionRequest,
   getAllConnectionRequests,
   acceptOrRejectConnectionRequest,
+  getCommonDetails,
+  allProfileAndOrganizationProfile
 };
