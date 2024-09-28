@@ -75,7 +75,7 @@ export default function RootLayout({
                     <Link href="/notifications">
                       <FaBell className="text-gray-600 w-6 h-6 cursor-pointer" />
                     </Link>
-                    <Link href="/messages">
+                    <Link href="/message">
                       <FaEnvelope className="text-gray-600 w-6 h-6 cursor-pointer" />
                     </Link>
                     <Link href="/profile">

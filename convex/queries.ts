@@ -41,6 +41,7 @@ import {
   readMessage,
   isMessageRead,
   deleteMessage,
+  getAllConversationDetails,
 } from "./function/message.function";
 
 import {
@@ -48,7 +49,7 @@ import {
   sendConnectRequest,
   getStatusOfConnectionRequest,
   getAllConnectionRequests,
-  acceptOrRejectConnectionRequest
+  acceptOrRejectConnectionRequest,
 } from "./function/network.function";
 
 export {
@@ -84,9 +85,10 @@ export {
   readMessage,
   isMessageRead,
   deleteMessage,
+  getAllConversationDetails,
   getPeopleYouMayKnow,
   sendConnectRequest,
   getStatusOfConnectionRequest,
   getAllConnectionRequests,
-  acceptOrRejectConnectionRequest
+  acceptOrRejectConnectionRequest,
 };

@@ -6,6 +6,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useState } from "react";
+import Link from "next/link";
 
 interface PeopleInterface {
   userId: Id<"users">;
@@ -59,7 +60,7 @@ export const PeopleCard = ({ people }: { people: PeopleInterface }) => {
 
       {/* Content Below Avatar */}
       <div className="mt-16 text-center">
-        <p className="font-medium text-lg">{people.name}</p>
+        <p className="font-medium text-lg hover:underline"><Link href={`/profile/${people.userId}`}>{people.name}</Link></p>
         <p className="text-sm text-gray-500">
           {people.bio && people.bio.length > 25
             ? `${people.bio.slice(0, 25)}...`

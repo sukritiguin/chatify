@@ -194,3 +194,80 @@ export const deleteMessage = mutation({
     });
   },
 });
+
+export const getAllConversationDetails = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    const conversations = await ctx.db
+      .query("conversation")
+      .filter((q) =>
+        q.or(
+          q.eq(q.field("firstUser"), userId),
+          q.eq(q.field("secondUser"), userId)
+        )
+      )
+      .collect();
+
+    const conversationResult = new Map();
+
+    for (const conversation of conversations) {
+      const messagingPerson =
+        conversation.firstUser === userId
+          ? conversation.secondUser
+          : conversation.secondUser === userId
+            ? conversation.firstUser
+            : null;
+      if (
+        messagingPerson === null ||
+        conversation.firstUser === conversation.secondUser
+      ) {
+        continue;
+      }
+      const messagingPersonProfile = await ctx.db
+        .query("profile")
+        .filter((q) => q.eq(q.field("userId"), messagingPerson))
+        .first();
+
+      const messages = await ctx.db
+        .query("messages")
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("conversationId"), conversation._id),
+            q.neq(q.field("senderId"), userId)
+          )
+        )
+        .collect();
+
+      let count = 0;
+      let lastUnseenMessage = "";
+      for (const message of messages) {
+        const temp = (await ctx.db.query("messageReads").collect())
+          .map((value) => value.messageId)
+          .includes(message._id);
+        if (!temp) {
+          count += 1;
+          lastUnseenMessage = message.content;
+        }
+      }
+
+      conversationResult.set(conversation._id, {
+        conversationId: conversation._id,
+        name: messagingPersonProfile?.name,
+        avatar: messagingPersonProfile?.profilePhoto,
+        unseenMessageCount: count,
+        lastUnseenMessage: lastUnseenMessage,
+        userId: messagingPersonProfile?.userId,
+      });
+    }
+
+    console.log(conversationResult);
+
+    return Object.fromEntries(conversationResult.entries());
+  },
+});
