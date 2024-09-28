@@ -11,6 +11,7 @@ import { SingleCommand } from "./Command";
 import { MdDeleteForever } from "react-icons/md";
 import ConfirmationDialog from "@/components/ui/confirmationDialog";
 import { EditPost } from "./EditPost";
+import Link from "next/link";
 
 interface PostProps {
   post: {
@@ -72,6 +73,10 @@ const Post: React.FC<PostProps> = ({ post }) => {
   )?.profilePhoto;
 
   const deletePost = useMutation(api.queries.deletePost);
+
+  const userRegistedAs = useQuery(api.queries.getUserRegistrationById, {
+    registeredUserId: post.user.userId,
+  });
 
   console.log({ existingReaction: existingReaction });
 
@@ -190,7 +195,16 @@ const Post: React.FC<PostProps> = ({ post }) => {
           width={48}
         />
         <div>
-          <span className="font-semibold text-lg">{user.name}</span>
+          <Link
+            href={
+              userRegistedAs?.type === "profile"
+                ? `/profile/${post.user.userId}`
+                : `/organization/${post.user.userId}`
+            }
+            className="hover:underline"
+          >
+            <span className="font-semibold text-lg">{user.name}</span>
+          </Link>
           <span className="text-gray-500 text-sm ml-2">
             {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
           </span>
@@ -230,7 +244,9 @@ const Post: React.FC<PostProps> = ({ post }) => {
       </div>
 
       {/* Post Content */}
-      <p className="text-gray-800 mb-2 text-base">{content}</p>
+      <Link href={`/feed/${post.id}`}>
+        <p className="text-gray-800 mb-2 text-base">{content}</p>
+      </Link>
 
       {/* Images */}
       {images.length > 0 && (

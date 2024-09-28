@@ -10,6 +10,7 @@ import { useQuery } from "convex/react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 
 interface Experience {
   company: string;
@@ -78,9 +79,11 @@ const SingleExperienceCard = ({
         </Avatar>
       </div>
       <div className="flex-1">
+        <Link href={`/organization/${organization?.adminUserId}`}>
         <h4 className="text-lg text-white font-semibold hover:underline cursor-pointer">
           {organization?.name}
         </h4>
+        </Link>
         <p className="text-sm font-light text-gray-200">{exp.designation}</p>
         <p className="text-sm text-gray-300">
           {formatDateRange(exp.start, exp.end)}

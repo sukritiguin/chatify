@@ -15,7 +15,10 @@ import {
   getAllOrganizations,
 } from "./function/organization.function";
 
-import { getUserRegistration } from "./function/register.function";
+import {
+  getUserRegistration,
+  getUserRegistrationById,
+} from "./function/register.function";
 
 import {
   insertPost,
@@ -70,6 +73,7 @@ export {
   getOrganizationByUserId,
   getAllOrganizations,
   getUserRegistration,
+  getUserRegistrationById,
   insertPost,
   getAllPosts,
   getUserProfileById,
