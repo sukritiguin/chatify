@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
-import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import { ConvexAuthNextjsServerProvider, isAuthenticatedNextjs } from "@convex-dev/auth/nextjs/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button"; // Assuming Shadcn's Button component
 import { LeftSideBar } from "./components/leftsidebar.layout";
@@ -29,8 +29,38 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   // const commonDetails = useQuery(api.queries.getCommonDetails)
+
+  // const { isLoading, isAuthenticated } = useConvexAuth();
+  const isAuthenticated = isAuthenticatedNextjs();
+
+  if (!isAuthenticated) {
+    return (
+      <ConvexAuthNextjsServerProvider>
+        <html lang="en">
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
+          >
+            <ConvexClientProvider>
+              <div className="flex flex-col min-h-screen">
+                {/* Header */}
+
+                {/* Main Layout Body */}
+                <div className="flex-grow container mx-auto flex py-6 space-x-6">
+                  {/* Left Sidebar */}
+
+                  {/* Main Content Area */}
+                  <main className="flex-grow bg-gray-100 text-gray-900 rounded-lg p-6 shadow">
+                    {children}
+                  </main>
+                </div>
+              </div>
+            </ConvexClientProvider>
+          </body>
+        </html>
+      </ConvexAuthNextjsServerProvider>
+    );
+  }
 
   return (
     <ConvexAuthNextjsServerProvider>

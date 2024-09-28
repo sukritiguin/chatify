@@ -42,6 +42,7 @@ import {
   isMessageRead,
   deleteMessage,
   getAllConversationDetails,
+  countUnreadConversations,
 } from "./function/message.function";
 
 import {
@@ -52,7 +53,10 @@ import {
   acceptOrRejectConnectionRequest,
 } from "./function/network.function";
 
-import { getCommonDetails, allProfileAndOrganizationProfile } from "./function/common.function";
+import {
+  getCommonDetails,
+  allProfileAndOrganizationProfile,
+} from "./function/common.function";
 
 export {
   currentUserId,
@@ -88,11 +92,12 @@ export {
   isMessageRead,
   deleteMessage,
   getAllConversationDetails,
+  countUnreadConversations,
   getPeopleYouMayKnow,
   sendConnectRequest,
   getStatusOfConnectionRequest,
   getAllConnectionRequests,
   acceptOrRejectConnectionRequest,
   getCommonDetails,
-  allProfileAndOrganizationProfile
+  allProfileAndOrganizationProfile,
 };

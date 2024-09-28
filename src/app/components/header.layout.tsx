@@ -21,6 +21,10 @@ export const Header = () => {
 
   const profiles = useQuery(api.queries.allProfileAndOrganizationProfile);
 
+  const countUnreadConversations = useQuery(
+    api.queries.countUnreadConversations
+  );
+
   // Filter the profiles based on the search term
   const filteredProfiles = profiles
     ? profiles.filter((profile) =>
@@ -67,9 +71,16 @@ export const Header = () => {
             <Link href="/notifications">
               <FaBell className="text-gray-600 w-6 h-6 cursor-pointer" />
             </Link>
-            <Link href="/message">
-              <FaEnvelope className="text-gray-600 w-6 h-6 cursor-pointer" />
-            </Link>
+            <div className="relative">
+              <Link href="/message">
+                <FaEnvelope className="text-gray-600 w-6 h-6 cursor-pointer" />
+                {countUnreadConversations!==0 && (
+                  <span className="absolute -top-3 left-4 flex items-center justify-center h-6 w-6 bg-red-500 text-white text-xs rounded-full">
+                    {countUnreadConversations}
+                  </span>
+                )}
+              </Link>
+            </div>
             <Link href="/profile">
               <Avatar>
                 <AvatarImage src={commonDetails?.avatar} alt="User" />

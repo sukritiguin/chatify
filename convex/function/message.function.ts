@@ -271,3 +271,52 @@ export const getAllConversationDetails = query({
     return Object.fromEntries(conversationResult.entries());
   },
 });
+
+export const countUnreadConversations = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access");
+    }
+
+    const conversations = await ctx.db
+      .query("conversation")
+      .filter((q) =>
+        q.or(
+          q.eq(q.field("firstUser"), userId),
+          q.eq(q.field("secondUser"), userId)
+        )
+      )
+      .collect();
+
+    let count = 0;
+
+    for (const conversation of conversations) {
+      const messages = await ctx.db
+        .query("messages")
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("conversationId"), conversation._id),
+            q.neq(q.field("senderId"), userId)
+          )
+        )
+        .collect();
+
+
+      for (const message of messages) {
+        const seen = await ctx.db
+          .query("messageReads")
+          .filter((q) => q.eq(q.field("messageId"), message._id))
+          .first();
+        if (!seen) {
+          count += 1;
+          break;
+        }
+      }
+    }
+
+    return count;
+  },
+});
