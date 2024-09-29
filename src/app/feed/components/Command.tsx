@@ -6,6 +6,7 @@ import React, { FormEvent, useRef, useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { SingleComment } from "./SingleCommand";
+import { GetCommentsByPostIdResponse } from "../../../../types/comment.interface";
 
 const reactions = [
   { emoji: "👍🏾", label: "Like" },
@@ -16,6 +17,10 @@ const reactions = [
   { emoji: "🤝", label: "Support" },
   { emoji: "🎉", label: "Celebrate" },
 ];
+
+
+
+
 
 export const SingleCommand = ({
   closeCommentDialog,
@@ -38,7 +43,7 @@ export const SingleCommand = ({
 
   const postComment = useMutation(api.queries.postComment);
 
-  const comments = useQuery(api.queries.getCommentByPostId, { postId: postId });
+  const comments:GetCommentsByPostIdResponse|undefined = useQuery(api.queries.getCommentByPostId, { postId: postId });
 
   const currentOrganizationAvatar = useQuery(api.queries.getOrganization)?.logo;
   const currentProfileAvatar = useQuery(
@@ -50,10 +55,6 @@ export const SingleCommand = ({
     commentDialogRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleReactionSelect = (reaction: string) => {
-    console.log({ reaction: reaction });
-    setHoveredComment(null);
-  };
 
   const handleMainCommentSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -123,7 +124,6 @@ export const SingleCommand = ({
                     hoveredComment={hoveredComment}
                     setHoveredComment={setHoveredComment}
                     reactions={reactions}
-                    handleReactionSelect={handleReactionSelect}
                     isReply={false}
                   />
                   {comment.replies.map((reply: any) => (
@@ -137,7 +137,6 @@ export const SingleCommand = ({
                         hoveredComment={hoveredComment}
                         setHoveredComment={setHoveredComment}
                         reactions={reactions}
-                        handleReactionSelect={handleReactionSelect}
                         isReply={true}
                       />
                     </div>

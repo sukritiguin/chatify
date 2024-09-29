@@ -214,6 +214,21 @@ const postReactions = defineTable({
   createdAt: v.string(), // Timestamp when the reaction was made
 });
 
+const commentReactions = defineTable({
+  commentId: v.id("comments"), // The post being reacted to
+  userId: v.id("users"), // The user reacting to the post
+  reactionType: v.union(
+    v.literal("Like"), // Like reaction
+    v.literal("Celebrate"), // Celebrate reaction
+    v.literal("Support"), // Support reaction
+    v.literal("Insightful"), // Insightful reaction
+    v.literal("Love"),
+    v.literal("Sad"),
+    v.literal("Funny")
+  ),
+  createdAt: v.string(), // Timestamp when the reaction was made
+});
+
 const conversationParticipant = defineTable({
   userId: v.id("users"), // ID of the participant (user)
   role: v.union(
@@ -249,12 +264,13 @@ const messageReactions = defineTable({
   messageId: v.id("messages"), // The message being reacted to
   userId: v.id("users"), // The user reacting to the message
   reactionType: v.union(
-    v.literal("like"),
-    v.literal("love"),
-    v.literal("laugh"),
-    v.literal("wow"),
-    v.literal("sad"),
-    v.literal("angry")
+    v.literal("Like"), // Like reaction
+    v.literal("Celebrate"), // Celebrate reaction
+    v.literal("Support"), // Support reaction
+    v.literal("Insightful"), // Insightful reaction
+    v.literal("Love"),
+    v.literal("Sad"),
+    v.literal("Funny")
   ),
   createdAt: v.optional(v.string()), // Timestamp when the reaction was made
 });
@@ -288,6 +304,7 @@ const schema = defineSchema({
   userConnections,
   userFollowings,
   postReactions,
+  commentReactions,
 
   messageReads,
   messageReactions,

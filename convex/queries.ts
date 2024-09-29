@@ -33,6 +33,9 @@ import {
   deleteComment,
   getPostById,
   updatePost,
+  likeComment,
+  getCommentReaction,
+  getCommentReactionCountByCommentId
 } from "./function/feed.function";
 
 import {
@@ -104,4 +107,7 @@ export {
   acceptOrRejectConnectionRequest,
   getCommonDetails,
   allProfileAndOrganizationProfile,
+  likeComment,
+  getCommentReaction,
+  getCommentReactionCountByCommentId
 };

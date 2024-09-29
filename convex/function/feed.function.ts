@@ -501,3 +501,167 @@ export const updatePost = mutation({
     });
   },
 });
+
+
+// Now time to add some queries and mutations to handle reactions in post comments
+
+export const likeComment = mutation({
+  args: {
+    commentId: v.id("comments"),
+    reactionType: v.union(
+      v.literal("Celebrate"),
+      v.literal("Support"),
+      v.literal("Insightful"),
+      v.literal("Sad"),
+      v.literal("Funny"),
+      v.literal("Love"),
+      v.literal("Like")
+    ),
+    increase: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const post = await ctx.db.get(args.commentId);
+
+    let updatedReaction:
+      | {
+          like: bigint;
+          celebrate: bigint;
+          support: bigint;
+          insightful: bigint;
+          love: bigint;
+          funny: bigint;
+          sad: bigint;
+        }
+      | undefined = post?.reactions;
+
+    if (!updatedReaction) {
+      updatedReaction = {
+        like: 0n,
+        love: 0n,
+        funny: 0n,
+        sad: 0n,
+        insightful: 0n,
+        support: 0n,
+        celebrate: 0n,
+      };
+    }
+
+    // Check the type of reaction and update the corresponding count
+    if (args.reactionType === "Like") {
+      if (args.increase) {
+        updatedReaction.like = (updatedReaction.like || 0n) + 1n; // Increment if increasing
+      } else {
+        updatedReaction.like = (updatedReaction.like || 0n) - 1n; // Do nothing if not increasing
+      }
+    } else if (args.reactionType === "Love") {
+      if (args.increase) {
+        updatedReaction.love = (updatedReaction.love || 0n) + 1n;
+      } else {
+        updatedReaction.love = (updatedReaction.love || 0n) - 1n; // Do nothing if not increasing
+      }
+    } else if (args.reactionType === "Funny") {
+      if (args.increase) {
+        updatedReaction.funny = (updatedReaction.funny || 0n) + 1n;
+      } else {
+        updatedReaction.funny = (updatedReaction.funny || 0n) - 1n;
+      }
+    } else if (args.reactionType === "Sad") {
+      if (args.increase) {
+        updatedReaction.sad = (updatedReaction.sad || 0n) + 1n;
+      } else {
+        updatedReaction.sad = (updatedReaction.sad || 0n) - 1n;
+      }
+    } else if (args.reactionType === "Insightful") {
+      if (args.increase) {
+        updatedReaction.insightful = (updatedReaction.insightful || 0n) + 1n;
+      } else {
+        updatedReaction.insightful = (updatedReaction.insightful || 0n) - 1n;
+      }
+    } else if (args.reactionType === "Support") {
+      if (args.increase) {
+        updatedReaction.support = (updatedReaction.support || 0n) + 1n;
+      } else {
+        updatedReaction.support = (updatedReaction.support || 0n) - 1n;
+      }
+    } else if (args.reactionType === "Celebrate") {
+      if (args.increase) {
+        updatedReaction.celebrate = (updatedReaction.celebrate || 0n) + 1n;
+      } else {
+        updatedReaction.celebrate = (updatedReaction.celebrate || 0n) - 1n;
+      }
+    } else {
+      console.error(`Unknown reaction type: ${args.reactionType}`);
+    }
+
+    await ctx.db.patch(args.commentId, { reactions: updatedReaction });
+
+    const existingReaction = await ctx.db
+      .query("commentReactions")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("commentId"), args.commentId),
+          q.eq(q.field("userId"), userId)
+        )
+      )
+      .first();
+
+    console.log({
+      checkExistingReaction: existingReaction,
+      commentId: args.commentId,
+    });
+    if (existingReaction) {
+      await ctx.db.patch(existingReaction._id, {
+        reactionType: args.reactionType,
+      });
+    } else {
+      await ctx.db.insert("commentReactions", {
+        userId: userId,
+        commentId: args.commentId,
+        reactionType: args.reactionType,
+        createdAt: new Date().toString(),
+      });
+    }
+  },
+});
+
+export const getCommentReaction = query({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+    const existingReaction = await ctx.db
+      .query("commentReactions")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("commentId"), args.commentId),
+          q.eq(q.field("userId"), userId)
+        )
+      )
+      .first();
+    return existingReaction;
+  },
+});
+
+export const getCommentReactionCountByCommentId = query({
+  args: { commentId: v.id("comments") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+    const existingReactions = await ctx.db
+      .query("commentReactions")
+      .filter((q) => q.eq(q.field("commentId"), args.commentId))
+      .collect();
+    if (!existingReactions) return 0;
+    return existingReactions.length;
+  },
+});
