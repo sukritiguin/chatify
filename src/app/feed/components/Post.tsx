@@ -118,7 +118,6 @@ const Post: React.FC<PostProps> = ({ post }) => {
     registeredUserId: post.user.userId,
   });
 
-
   useEffect(() => {
     if (existingReaction) {
       setLikedReaction(existingReaction?.reactionType);
@@ -372,7 +371,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
       </div>
 
       {/* Post Content */}
-      <Link href={`/feed/${post.id}`}>
+      <Link href={`/feed/${sharedPost ? sharedPost._id : post.id}`}>
         <p className="text-gray-800 mb-2 text-base">
           {sharedPost ? sharedPost.content : content}
         </p>
