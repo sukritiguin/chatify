@@ -169,16 +169,45 @@ const feeds = defineTable({
 
 const notifications = defineTable({
   userId: v.id("users"), // The user who receives the notification
-  postId: v.optional(v.id("posts")), // The post related to the notification (optional)
-  action: v.union(
+  type: v.union(
     v.literal("like"), // User liked a post
     v.literal("comment"), // User commented on a post
     v.literal("share"), // User shared a post
-    v.literal("mention") // User was mentioned in a post
+    v.literal("mention"), // User was mentioned in a post or comment
+    v.literal("connection_request"), // Received a connection request
+    v.literal("connection_accept"), // Connection request accepted
+    v.literal("endorsement"), // User was endorsed for a skill
+    v.literal("profile_view"), // User's profile was viewed
+    v.literal("job_posted"), // A job relevant to the user was posted
+    v.literal("event_invitation"), // Invited to an event
+    v.literal("group_invitation"), // Invited to join a group
+    v.literal("article_recommendation"), // Recommended an article
+    v.literal("announcement") // Platform announcements or updates
   ),
-  fromUserId: v.id("users"), // The user who performed the action
+  referenceId: v.optional(v.string()), // ID referencing the related entity (e.g., postId, commentId, userId)
+  referenceType: v.optional(
+    v.union(
+      v.literal("posts"),
+      v.literal("comments"),
+      v.literal("users"),
+      v.literal("jobs"),
+      v.literal("events"),
+      v.literal("groups"),
+      v.literal("articles"),
+      v.literal("announcements")
+    )
+  ), // Type of the referenced entity
+  fromUserId: v.optional(v.id("users")), // The user who performed the action (if applicable)
+  metadata: v.optional(
+    v.object({
+      // Additional data depending on the notification type
+      message: v.optional(v.string()), // Custom message for the notification
+      actionUrl: v.optional(v.string()), // URL to navigate when the notification is clicked
+      // Add more fields as necessary based on notification types
+    })
+  ),
   createdAt: v.string(), // Timestamp when the notification was created
-  isRead: v.optional(v.boolean()), // Whether the notification has been read
+  isRead: v.boolean(), // Whether the notification has been read
 });
 
 const userConnections = defineTable({
