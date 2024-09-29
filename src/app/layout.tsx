@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
-import { ConvexAuthNextjsServerProvider, isAuthenticatedNextjs } from "@convex-dev/auth/nextjs/server";
+import {
+  ConvexAuthNextjsServerProvider,
+  isAuthenticatedNextjs,
+} from "@convex-dev/auth/nextjs/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button"; // Assuming Shadcn's Button component
 import { LeftSideBar } from "./components/leftsidebar.layout";
 import { Header } from "./components/header.layout";
+import { ToastContainer } from "react-toastify";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -146,6 +150,18 @@ export default function RootLayout({
                 </div>
               </footer>
             </div>
+            <ToastContainer
+              position="top-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored" // Optional: choose a theme
+            />
           </ConvexClientProvider>
         </body>
       </html>

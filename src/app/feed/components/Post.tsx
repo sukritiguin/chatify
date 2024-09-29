@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { FaThumbsUp, FaComment, FaShare, FaEdit } from "react-icons/fa";
 import { formatDistanceToNow } from "date-fns"; // For formatting timestamps
@@ -12,6 +12,8 @@ import { MdDeleteForever } from "react-icons/md";
 import ConfirmationDialog from "@/components/ui/confirmationDialog";
 import { EditPost } from "./EditPost";
 import Link from "next/link";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface PostProps {
   post: {
@@ -25,6 +27,7 @@ interface PostProps {
     };
     createdAt: string;
     visibility: "public" | "connections" | "private";
+    sharedPostId: string | undefined;
   };
 }
 
@@ -39,7 +42,7 @@ const reactions = [
 ];
 
 const Post: React.FC<PostProps> = ({ post }) => {
-  const { content, images = [], user, createdAt } = post;
+  const { content, images = [], user, createdAt, sharedPostId } = post;
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [showReactions, setShowReactions] = useState(false); // Track reaction dropdown
@@ -48,21 +51,57 @@ const Post: React.FC<PostProps> = ({ post }) => {
   const [isEditPostDialogOpen, setEditPostDialogOpen] = useState(false);
   const [isDeleteConfirmationDialogOpen, setDeleteConfirmationDialogOpen] =
     useState(false);
+  const sharedPost = useQuery(
+    api.queries.getPostById,
+    !(sharedPostId === undefined || sharedPostId === "")
+      ? { postId: sharedPostId as Id<"posts"> }
+      : "skip"
+  );
+  const profile = useQuery(
+    api.queries.getUserProfileById,
+    sharedPost ? { userId: sharedPost.userId } : "skip"
+  ); // TODO: Also handle this if the sharedPost is from any organization
+
+  const organization = useQuery(
+    api.queries.getOrganizationByUserId,
+    sharedPost ? { userId: sharedPost.userId } : "skip"
+  );
+
+  const sharedPostUser = useMemo(() => {
+    return profile
+      ? {
+          name: profile.name || "",
+          avatar: profile.profilePhoto || "",
+          type: "profile",
+          userId: profile.userId || "",
+        }
+      : organization
+        ? {
+            name: organization?.name || "",
+            avatar: organization?.logo || "",
+            type: "organization",
+            userId: organization?.adminUserId || "",
+          }
+        : null;
+  }, [profile, organization]);
 
   const [likedReaction, setLikedReaction] = useState<string | null>(null); // Track liked reaction
 
   const likePost = useMutation(api.queries.likePost);
   const existingReaction = useQuery(api.queries.getReaction, {
-    postId: post.id as Id<"posts">,
+    postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
   });
   const reactionCount = useQuery(api.queries.getReactionCountByPostId, {
-    postId: post.id as Id<"posts">,
+    postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
+  });
+  const shareCount = useQuery(api.queries.totalShareCountByPostId, {
+    postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
   });
 
   const postComment = useMutation(api.queries.postComment);
 
   const totalComments = useQuery(api.queries.totalCommentsByPostId, {
-    postId: post.id as Id<"posts">,
+    postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
   });
 
   const currentUserId = useQuery(api.queries.currentUserId);
@@ -73,18 +112,20 @@ const Post: React.FC<PostProps> = ({ post }) => {
   )?.profilePhoto;
 
   const deletePost = useMutation(api.queries.deletePost);
+  const insertPost = useMutation(api.queries.insertPost);
 
   const userRegistedAs = useQuery(api.queries.getUserRegistrationById, {
     registeredUserId: post.user.userId,
   });
 
-  console.log({ existingReaction: existingReaction });
 
   useEffect(() => {
     if (existingReaction) {
       setLikedReaction(existingReaction?.reactionType);
     }
-  }, [existingReaction]);
+    if (!(sharedPost === undefined || sharedPost === null)) {
+    }
+  }, [existingReaction, sharedPost, sharedPostId, sharedPostUser]);
 
   const handleDeleteClick = () => {
     setDeleteConfirmationDialogOpen(true); // Open confirmation dialog
@@ -124,11 +165,28 @@ const Post: React.FC<PostProps> = ({ post }) => {
     openDialog();
   };
 
+  const handleShare = async () => {
+    try {
+      const data = {
+        content: "",
+        sharedPostId: (sharedPost ? sharedPost._id : post.id) as string,
+        visibility: "public" as "public" | "connections" | "private",
+      };
+
+      await insertPost({ data: data });
+
+      console.log("Post shared successfully!"); // Add this for debugging
+      toast.success("You shared the post successfully!");
+    } catch (error) {
+      toast.error("Something went wrong while sharing the post.");
+    }
+  };
+
   // Handle reaction selection
   const handleReactionSelect = (reaction: string) => {
     if (likedReaction !== null) {
       likePost({
-        postId: post.id as Id<"posts">,
+        postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
         reactionType: likedReaction as
           | "Celebrate"
           | "Support"
@@ -145,7 +203,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
     console.log(`Post liked with reaction: ${reaction}`);
 
     likePost({
-      postId: post.id as Id<"posts">,
+      postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
       reactionType: reaction as
         | "Celebrate"
         | "Support"
@@ -161,11 +219,10 @@ const Post: React.FC<PostProps> = ({ post }) => {
   // Handle comment submission
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Comment submitted:", comment);
     setComment(""); // Reset comment input
 
     const data = {
-      postId: post.id as Id<"posts">,
+      postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
       content: comment,
       parentId: undefined,
       reactions: {
@@ -185,11 +242,73 @@ const Post: React.FC<PostProps> = ({ post }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 mb-4 border border-gray-300 max-w-2xl mx-auto">
+      {/* Shared user information */}
+      {sharedPost && (
+        <div className="flex items-center mb-2">
+          <Image
+            src={user.profileImage}
+            alt={user.name}
+            className="w-6 h-6 rounded-full border-2 border-blue-500 mr-3"
+            height={48}
+            width={48}
+          />
+          <div>
+            <Link
+              href={
+                userRegistedAs?.type === "profile"
+                  ? `/profile/${post.user.userId}`
+                  : `/organization/${post.user.userId}`
+              }
+              className="hover:underline"
+            >
+              <span className="font-semibold text-sm">{user.name}</span>
+            </Link>
+            {" shared this post"}
+            <span className="text-gray-500 text-sm ml-2">
+              {formatDistanceToNow(
+                new Date(sharedPost ? createdAt : createdAt),
+                { addSuffix: true }
+              )}
+            </span>
+          </div>
+          {post.user.userId === currentUserId && (
+            <div className="flex justify-center items-center ml-auto">
+              <div
+                className="ml-auto hover:cursor-pointer text-red-500 hover:text-red-600"
+                onClick={handleDeleteClick}
+              >
+                <MdDeleteForever />
+              </div>
+            </div>
+          )}
+
+          {/* Edit Post Dialog */}
+
+          <EditPost
+            isOpen={isEditPostDialogOpen}
+            setOpen={setEditPostDialogOpen}
+            postId={post.id as Id<"posts">}
+          />
+
+          {/* Confirmation Dialog */}
+          <ConfirmationDialog
+            message="Are you sure you want to delete this post?"
+            isOpen={isDeleteConfirmationDialogOpen}
+            onConfirm={handleConfirmDelete}
+            onCancel={handleCancelDelete}
+          />
+        </div>
+      )}
+      {sharedPost && <Separator />}
       {/* User Information */}
-      <div className="flex items-center mb-4">
+      <div className="flex items-center mb-4 mt-2">
         <Image
-          src={user.profileImage}
-          alt={user.name}
+          src={
+            sharedPostUser
+              ? (sharedPostUser.avatar as string)
+              : user.profileImage
+          }
+          alt={sharedPostUser ? (sharedPostUser.name as string) : user.name}
           className="w-12 h-12 rounded-full border-2 border-blue-500 mr-3"
           height={48}
           width={48}
@@ -197,19 +316,28 @@ const Post: React.FC<PostProps> = ({ post }) => {
         <div>
           <Link
             href={
-              userRegistedAs?.type === "profile"
-                ? `/profile/${post.user.userId}`
-                : `/organization/${post.user.userId}`
+              sharedPostUser
+                ? `/profile/${sharedPostUser.userId}`
+                : userRegistedAs?.type === "profile"
+                  ? `/profile/${post.user.userId}`
+                  : `/organization/${post.user.userId}`
             }
             className="hover:underline"
           >
-            <span className="font-semibold text-lg">{user.name}</span>
+            <span className="font-semibold text-lg">
+              {sharedPostUser ? (sharedPostUser.name as string) : user.name}
+            </span>
           </Link>
           <span className="text-gray-500 text-sm ml-2">
-            {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+            {formatDistanceToNow(
+              new Date(
+                sharedPost ? (sharedPost.createdAt as string) : createdAt
+              ),
+              { addSuffix: true }
+            )}
           </span>
         </div>
-        {post.user.userId === currentUserId && (
+        {(!sharedPost ? post.user.userId === currentUserId : false) && (
           <div className="flex justify-center items-center ml-auto">
             <div
               className="ml-auto p-2 text-red-500 hover:text-red-600 hover:cursor-pointer"
@@ -245,11 +373,13 @@ const Post: React.FC<PostProps> = ({ post }) => {
 
       {/* Post Content */}
       <Link href={`/feed/${post.id}`}>
-        <p className="text-gray-800 mb-2 text-base">{content}</p>
+        <p className="text-gray-800 mb-2 text-base">
+          {sharedPost ? sharedPost.content : content}
+        </p>
       </Link>
 
       {/* Images */}
-      {images.length > 0 && (
+      {!sharedPost && images.length > 0 && (
         <div className="relative mb-4">
           <div className="grid grid-cols-2 gap-2">
             {images.slice(0, 3).map((imageUrl, index) => (
@@ -287,6 +417,44 @@ const Post: React.FC<PostProps> = ({ post }) => {
         </div>
       )}
 
+      {sharedPost && sharedPost.media && sharedPost.media.length > 0 && (
+        <div className="relative mb-4">
+          <div className="grid grid-cols-2 gap-2">
+            {sharedPost.media.slice(0, 3).map((imageUrl, index) => (
+              <div key={index} className="cursor-pointer">
+                <Image
+                  src={imageUrl}
+                  alt={`Post Image ${index + 1}`}
+                  className="w-full h-40 object-cover rounded-lg transition-transform transform hover:scale-105"
+                  height={160}
+                  width={200}
+                  onClick={() => openImageDialog(imageUrl)} // Click handler
+                />
+              </div>
+            ))}
+
+            {sharedPost.media.length > 3 && (
+              <div className="relative cursor-pointer">
+                <Image
+                  src={sharedPost.media[3]}
+                  alt="More images"
+                  className="w-full h-40 object-cover rounded-lg"
+                  height={160}
+                  width={200}
+                  onClick={openDialog} // Open dialog when this image is clicked
+                />
+                <button
+                  onClick={openDialog}
+                  className="absolute top-0 left-0 h-full w-full flex items-center justify-center bg-gray-700 bg-opacity-70 text-white rounded-lg"
+                >
+                  +{sharedPost.media.length - 3} more images
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Interaction Buttons */}
 
       <div className="flex flex-col mt-4 relative">
@@ -294,7 +462,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
           <div className="flex justify-between text-gray-600">
             <span className="text-green-500">{reactionCount} likes</span>
             <span className="text-green-500">{totalComments} comments</span>
-            <span className="text-green-500">{0} shares</span>
+            <span className="text-green-500">{shareCount} shares</span>
           </div>
         </div>
         <Separator />
@@ -349,7 +517,10 @@ const Post: React.FC<PostProps> = ({ post }) => {
             Comment
           </button>
 
-          <button className="flex items-center hover:text-blue-500">
+          <button
+            className={`flex items-center hover:text-blue-500`}
+            onClick={handleShare}
+          >
             <FaShare className="mr-1" />
             Share
           </button>
@@ -415,8 +586,16 @@ const Post: React.FC<PostProps> = ({ post }) => {
       {isCommentDialogOpen && (
         <SingleCommand
           closeCommentDialog={closeCommentDialog}
-          user={user}
-          postId={post.id}
+          user={
+            sharedPostUser
+              ? {
+                  name: sharedPostUser.name,
+                  profileImage: sharedPostUser.avatar,
+                  userId: sharedPostUser.userId as Id<"users">,
+                }
+              : user
+          }
+          postId={sharedPost ? sharedPost._id : post.id}
         />
       )}
 

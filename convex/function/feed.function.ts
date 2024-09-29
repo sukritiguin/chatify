@@ -13,6 +13,7 @@ export const insertPost = mutation({
         v.literal("connections"),
         v.literal("private")
       ), // Visibility options matching your schema
+      sharedPostId: v.optional(v.string()),
     }),
   },
   async handler(ctx, args_0) {
@@ -52,7 +53,7 @@ export const insertPost = mutation({
       isPromoted: false,
 
       // Null sharedPostId for non-shared posts
-      sharedPostId: "", // Use "" for no shared post reference, // TODO: Must be done later to handle repost/share
+      sharedPostId: data.sharedPostId, // Use "" for no shared post reference, // TODO: Must be done later to handle repost/share
     };
 
     // Insert the post into the "posts" table
@@ -416,6 +417,24 @@ export const totalCommentsByPostId = query({
   },
 });
 
+export const totalShareCountByPostId = query({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const allsharedPosts = await ctx.db
+      .query("posts")
+      .filter((q) => q.eq(q.field("sharedPostId"), args.postId as string))
+      .collect();
+
+    return allsharedPosts.length;
+  },
+});
+
 export const deletePost = mutation({
   args: { postId: v.id("posts") },
   handler: async (ctx, args) => {
@@ -501,7 +520,6 @@ export const updatePost = mutation({
     });
   },
 });
-
 
 // Now time to add some queries and mutations to handle reactions in post comments
 

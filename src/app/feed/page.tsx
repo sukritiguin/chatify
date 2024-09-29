@@ -16,6 +16,7 @@ interface PostDataInterface {
   };
   createdAt: string;
   visibility: "public" | "connections" | "private";
+  sharedPostId: string | undefined;
 }
 
 const FeedPage = () => {
@@ -42,6 +43,7 @@ const FeedPage = () => {
           },
           createdAt: singlePost.post.createdAt as string,
           visibility: singlePost.post.visibility,
+          sharedPostId: singlePost.post.sharedPostId
         };
 
         return <Post key={post.id} post={post} />;
