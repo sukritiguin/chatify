@@ -21,6 +21,13 @@ import {
 } from "./function/register.function";
 
 import {
+  insertNotification,
+  getNotificationsForCurrentUser,
+  readNotification,
+  countUnreadNotificationsOfcurrentUser
+} from "./function/notification.function";
+
+import {
   insertPost,
   getAllPosts,
   likePost,
@@ -36,7 +43,7 @@ import {
   updatePost,
   likeComment,
   getCommentReaction,
-  getCommentReactionCountByCommentId
+  getCommentReactionCountByCommentId,
 } from "./function/feed.function";
 
 import {
@@ -62,6 +69,7 @@ import {
 
 import {
   getCommonDetails,
+  getCommonDetailsByUserId,
   allProfileAndOrganizationProfile,
 } from "./function/common.function";
 
@@ -108,8 +116,13 @@ export {
   getAllConnectionRequests,
   acceptOrRejectConnectionRequest,
   getCommonDetails,
+  getCommonDetailsByUserId,
   allProfileAndOrganizationProfile,
   likeComment,
   getCommentReaction,
-  getCommentReactionCountByCommentId
+  getCommentReactionCountByCommentId,
+  insertNotification,
+  getNotificationsForCurrentUser,
+  readNotification,
+  countUnreadNotificationsOfcurrentUser
 };

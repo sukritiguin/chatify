@@ -15,6 +15,7 @@ interface PostDataInterface {
   };
   createdAt: string;
   visibility: "public" | "connections" | "private";
+  sharedPostId: string | undefined;
 }
 
 export const PostPage = ({ params }: { params: { postId: string } }) => {
@@ -36,17 +37,22 @@ export const PostPage = ({ params }: { params: { postId: string } }) => {
     id: post?._id as Id<"posts">,
     content: post?.content as string,
     images: post?.media,
-    user: profile ? {
-      userId: profile.userId as Id<"users">,
-      name: profile.name as string,
-      profileImage: profile.profilePhoto as string
-    } : {
-      userId: organization?.adminUserId as Id<"users">,
-      name: organization?.name as string,
-      profileImage: organization?.logo as string
-    },
-    createdAt: post?.createdAt as string,
+    user: profile
+      ? {
+          userId: profile.userId as Id<"users">,
+          name: profile.name as string,
+          profileImage: profile.profilePhoto as string,
+        }
+      : {
+          userId: organization?.adminUserId as Id<"users">,
+          name: organization?.name as string,
+          profileImage: organization?.logo as string,
+        },
+    createdAt: (post?.createdAt
+      ? post.createdAt
+      : new Date().toString()) as string,
     visibility: post?.visibility === undefined ? "public" : post?.visibility,
+    sharedPostId: post?.sharedPostId,
   };
 
   return <Post post={postData} />;

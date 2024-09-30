@@ -57,6 +57,9 @@ export const SingleComment = ({
     }
   );
   console.log({ existingReaction: existingReaction });
+
+  const insertNotification = useMutation(api.queries.insertNotification);
+
   useEffect(() => {
     if (existingReaction) {
       setLikedReaction(existingReaction?.reactionType);
@@ -76,7 +79,7 @@ export const SingleComment = ({
     setDeleteConfirmationDialogOpen(false); // Close dialog without deleting
   };
 
-  const handleReactionSelect = (reaction: string) => {
+  const handleReactionSelect = async (reaction: string) => {
     if (likedReaction !== null) {
       likeComment({
         commentId: comment.comment._id as Id<"comments">,
@@ -95,7 +98,7 @@ export const SingleComment = ({
     setHoveredComment(null); // Close the dropdown after selecting
     console.log(`Post liked with reaction: ${reaction}`);
 
-    likeComment({
+    await likeComment({
       commentId: comment.comment._id as Id<"comments">,
       reactionType: reaction as
         | "Celebrate"
@@ -107,6 +110,13 @@ export const SingleComment = ({
         | "Like",
       increase: true,
     });
+
+    await insertNotification({
+      userId: comment.user.userId as Id<"users">,
+      referanceUrl: `/feed/${comment.comment.postId}`,
+      type: "like",
+    });
+
   };
 
   return (

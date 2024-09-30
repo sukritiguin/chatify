@@ -1,20 +1,6 @@
 // src/components/Notifications/types.ts
 
-import {
-  FaThumbsUp,
-  FaComment,
-  FaShare,
-  FaAt,
-  FaUserPlus,
-  FaUserCheck,
-  FaStar,
-  FaEye,
-  FaBriefcase,
-  FaCalendarAlt,
-  FaUsers,
-  FaNewspaper,
-  FaBullhorn,
-} from "react-icons/fa";
+import { ReactNode } from "react";
 import { IconType } from "react-icons";
 
 
@@ -22,6 +8,7 @@ import { IconType } from "react-icons";
 
 export type NotificationType =
   | "like"
+  | "like_comment"
   | "comment"
   | "share"
   | "mention"
@@ -66,99 +53,34 @@ export interface Notification {
   isRead: boolean;
 }
 
-
-interface NotificationTypeMapping {
-  icon: IconType;
-  color: string;
-  message: (fromUser?: string, reference?: string) => string;
+export interface NotificationInterface {
+  userId: string; // The user who receives the notification
+  type: NotificationType;
+  referanceUrl?: string; // Optional URL related to the notification
+  referenceId?: string; // ID referencing the related entity (e.g., postId, commentId, userId)
+  referenceType?: 
+    | "posts"
+    | "comments"
+    | "users"
+    | "jobs"
+    | "events"
+    | "groups"
+    | "articles"
+    | "announcements"; // Type of the referenced entity
+  fromUserId?: string; // The user who performed the action (if applicable)
+  metadata?: {
+    message?: string; // Custom message for the notification
+    actionUrl?: string; // URL to navigate when the notification is clicked
+    // Additional fields can be added as necessary
+  };
+  createdAt: string; // Timestamp when the notification was created
+  isRead: boolean; // Indicates if the notification has been read
 }
 
-export const notificationTypes: Record<NotificationType, NotificationTypeMapping> = {
-  like: {
-    icon: FaThumbsUp,
-    color: "text-blue-500",
-    message: (fromUser, reference) =>
-      fromUser && reference
-        ? `${fromUser} liked your post "${reference}".`
-        : "Someone liked your post.",
-  },
-  comment: {
-    icon: FaComment,
-    color: "text-green-500",
-    message: (fromUser, reference) =>
-      fromUser && reference
-        ? `${fromUser} commented on your post "${reference}".`
-        : "Someone commented on your post.",
-  },
-  share: {
-    icon: FaShare,
-    color: "text-yellow-500",
-    message: (fromUser, reference) =>
-      fromUser && reference
-        ? `${fromUser} shared your post "${reference}".`
-        : "Someone shared your post.",
-  },
-  mention: {
-    icon: FaAt,
-    color: "text-purple-500",
-    message: (fromUser, reference) =>
-      fromUser && reference
-        ? `${fromUser} mentioned you in "${reference}".`
-        : "You were mentioned in a post.",
-  },
-  connection_request: {
-    icon: FaUserPlus,
-    color: "text-indigo-500",
-    message: (fromUser) =>
-      fromUser ? `${fromUser} sent you a connection request.` : "You have a new connection request.",
-  },
-  connection_accept: {
-    icon: FaUserCheck,
-    color: "text-green-500",
-    message: (fromUser) =>
-      fromUser ? `${fromUser} accepted your connection request.` : "Your connection request was accepted.",
-  },
-  endorsement: {
-    icon: FaStar,
-    color: "text-yellow-500",
-    message: (fromUser, reference) =>
-      fromUser && reference
-        ? `${fromUser} endorsed your skill "${reference}".`
-        : "You have been endorsed for a skill.",
-  },
-  profile_view: {
-    icon: FaEye,
-    color: "text-gray-500",
-    message: (fromUser) =>
-      fromUser ? `${fromUser} viewed your profile.` : "Someone viewed your profile.",
-  },
-  job_posted: {
-    icon: FaBriefcase,
-    color: "text-blue-500",
-    message: () => `A job matching your profile was posted.`,
-  },
-  event_invitation: {
-    icon: FaCalendarAlt,
-    color: "text-pink-500",
-    message: (reference) =>
-      reference ? `You are invited to the event "${reference}".` : "You have a new event invitation.",
-  },
-  group_invitation: {
-    icon: FaUsers,
-    color: "text-teal-500",
-    message: (reference) =>
-      reference ? `You are invited to join the group "${reference}".` : "You have a new group invitation.",
-  },
-  article_recommendation: {
-    icon: FaNewspaper,
-    color: "text-orange-500",
-    message: (reference) =>
-      reference ? `We recommend the article "${reference}".` : "A new article is recommended for you.",
-  },
-  announcement: {
-    icon: FaBullhorn,
-    color: "text-red-500",
-    message: (reference) =>
-      reference ? `Announcement: "${reference}".` : "There is a new announcement.",
-  },
-};
+export interface NotificationTypeMapping {
+  icon: IconType;
+  color: string;
+  message: (fromUser?: string, fromUserUrl?: string, reference?: string) => ReactNode;
+}
+
+

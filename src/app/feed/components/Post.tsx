@@ -88,9 +88,14 @@ const Post: React.FC<PostProps> = ({ post }) => {
   const [likedReaction, setLikedReaction] = useState<string | null>(null); // Track liked reaction
 
   const likePost = useMutation(api.queries.likePost);
-  const existingReaction = useQuery(api.queries.getReaction, {
-    postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
-  });
+  const existingReaction = useQuery(
+    api.queries.getReaction,
+    (sharedPost ? sharedPost._id : post.id)
+      ? {
+          postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
+        }
+      : "skip"
+  );
   const reactionCount = useQuery(api.queries.getReactionCountByPostId, {
     postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
   });
@@ -114,9 +119,16 @@ const Post: React.FC<PostProps> = ({ post }) => {
   const deletePost = useMutation(api.queries.deletePost);
   const insertPost = useMutation(api.queries.insertPost);
 
-  const userRegistedAs = useQuery(api.queries.getUserRegistrationById, {
-    registeredUserId: post.user.userId,
-  });
+  const insertNotification = useMutation(api.queries.insertNotification);
+
+  const userRegistedAs = useQuery(
+    api.queries.getUserRegistrationById,
+    post.user.userId
+      ? {
+          registeredUserId: post.user.userId,
+        }
+      : "skip"
+  );
 
   useEffect(() => {
     if (existingReaction) {
@@ -174,6 +186,12 @@ const Post: React.FC<PostProps> = ({ post }) => {
 
       await insertPost({ data: data });
 
+      await insertNotification({
+        userId: sharedPost ? sharedPost.userId : post.user.userId,
+        referanceUrl: `/feed/${post.id}`,
+        type: "share",
+      });
+
       console.log("Post shared successfully!"); // Add this for debugging
       toast.success("You shared the post successfully!");
     } catch (error) {
@@ -182,7 +200,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
   };
 
   // Handle reaction selection
-  const handleReactionSelect = (reaction: string) => {
+  const handleReactionSelect = async (reaction: string) => {
     if (likedReaction !== null) {
       likePost({
         postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
@@ -201,7 +219,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
     setShowReactions(false); // Close the dropdown after selecting
     console.log(`Post liked with reaction: ${reaction}`);
 
-    likePost({
+    await likePost({
       postId: (sharedPost ? sharedPost._id : post.id) as Id<"posts">,
       reactionType: reaction as
         | "Celebrate"
@@ -212,6 +230,12 @@ const Post: React.FC<PostProps> = ({ post }) => {
         | "Love"
         | "Like",
       increase: true,
+    });
+
+    await insertNotification({
+      userId: sharedPost ? sharedPost.userId : post.user.userId,
+      referanceUrl: `/feed/${post.id}`,
+      type: "like",
     });
   };
 
@@ -236,6 +260,11 @@ const Post: React.FC<PostProps> = ({ post }) => {
     };
 
     await postComment({ data: data });
+    await insertNotification({
+      userId: sharedPost ? sharedPost.userId : post.user.userId,
+      referanceUrl: `/feed/${post.id}`,
+      type: "comment",
+    });
     openCommentDialog();
   };
 
@@ -264,10 +293,7 @@ const Post: React.FC<PostProps> = ({ post }) => {
             </Link>
             {" shared this post"}
             <span className="text-gray-500 text-sm ml-2">
-              {formatDistanceToNow(
-                new Date(sharedPost ? createdAt : createdAt),
-                { addSuffix: true }
-              )}
+              {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
             </span>
           </div>
           {post.user.userId === currentUserId && (

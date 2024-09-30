@@ -25,6 +25,10 @@ export const Header = () => {
     api.queries.countUnreadConversations
   );
 
+  const countNotifications = useQuery(
+    api.queries.countUnreadNotificationsOfcurrentUser
+  );
+
   // Filter the profiles based on the search term
   const filteredProfiles = profiles
     ? profiles.filter((profile) =>
@@ -68,13 +72,20 @@ export const Header = () => {
             <Link href="/jobs">
               <FaBriefcase className="text-gray-600 w-6 h-6 cursor-pointer" />
             </Link>
-            <Link href="/notifications">
-              <FaBell className="text-gray-600 w-6 h-6 cursor-pointer" />
-            </Link>
+            <div className="relative">
+              <Link href="/notifications">
+                <FaBell className="text-gray-600 w-6 h-6 cursor-pointer" />
+                {countNotifications !== 0 && (
+                  <span className="absolute -top-3 left-4 flex items-center justify-center h-6 w-6 bg-red-500 text-white text-xs rounded-full">
+                    {countNotifications}
+                  </span>
+                )}
+              </Link>
+            </div>
             <div className="relative">
               <Link href="/message">
                 <FaEnvelope className="text-gray-600 w-6 h-6 cursor-pointer" />
-                {countUnreadConversations!==0 && (
+                {countUnreadConversations !== 0 && (
                   <span className="absolute -top-3 left-4 flex items-center justify-center h-6 w-6 bg-red-500 text-white text-xs rounded-full">
                     {countUnreadConversations}
                   </span>

@@ -1,3 +1,4 @@
+import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
@@ -82,5 +83,44 @@ export const allProfileAndOrganizationProfile = query({
     const result = [...profiles, ...organizations];
 
     return result;
+  },
+});
+
+export const getCommonDetailsByUserId = query({
+  args: {userId: v.id("users")},
+  handler: async (ctx, args) => {
+    const userId = getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const profile = await ctx.db.query("profile").filter(
+      (q) => q.eq(q.field("userId"), args.userId)
+    ).first();
+
+    if(profile){
+      return {
+        userId: profile.userId,
+        name: profile.name,
+        bio: profile.bio,
+        cover: profile.coverPhoto,
+        avatar: profile.profilePhoto,
+        url: `/profile/${profile.userId}`
+      }
+    }
+    const organization = await ctx.db.query("organizations").filter(
+      (q) => q.eq(q.field("adminUserId"), args.userId)
+    ).first();
+
+    if(organization){
+      return {
+        userId: organization.adminUserId,
+        name: organization.name,
+        bio: organization.description,
+        cover: organization.banner,
+        avatar: organization.logo,
+        url: `/organization/${organization.adminUserId}`
+      }
+    }
   },
 });

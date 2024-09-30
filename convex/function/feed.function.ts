@@ -57,7 +57,8 @@ export const insertPost = mutation({
     };
 
     // Insert the post into the "posts" table
-    await ctx.db.insert("posts", dataObject);
+    const result = await ctx.db.insert("posts", dataObject);
+    return result;
   },
 });
 

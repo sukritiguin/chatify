@@ -171,6 +171,7 @@ const notifications = defineTable({
   userId: v.id("users"), // The user who receives the notification
   type: v.union(
     v.literal("like"), // User liked a post
+    v.literal("like_comment"),
     v.literal("comment"), // User commented on a post
     v.literal("share"), // User shared a post
     v.literal("mention"), // User was mentioned in a post or comment
@@ -184,6 +185,7 @@ const notifications = defineTable({
     v.literal("article_recommendation"), // Recommended an article
     v.literal("announcement") // Platform announcements or updates
   ),
+  referanceUrl: v.optional(v.string()),
   referenceId: v.optional(v.string()), // ID referencing the related entity (e.g., postId, commentId, userId)
   referenceType: v.optional(
     v.union(
