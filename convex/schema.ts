@@ -322,6 +322,58 @@ const connection = defineTable({
   ),
 });
 
+// - Below is the schema for jobs section in LinkedIn like application.
+
+const jobs = defineTable({
+  organizationId: v.id("organizations"), // Reference to the organization
+  title: v.string(),
+  description: v.string(),
+  location: v.string(),
+  employmentType: v.union(
+    v.literal("full_time"),
+    v.literal("part_time"),
+    v.literal("contract"),
+    v.literal("internship"),
+    v.literal("temporary"),
+    v.literal("freelance")
+  ),
+  salaryRange: v.optional(
+    v.object({
+      min: v.number(),
+      max: v.optional(v.number()),
+      currency: v.string(),
+    })
+  ),
+  skills: v.array(v.string()), // List of required skills (can be skill names or IDs)
+  experienceLevel: v.union(
+    v.literal("entry"),
+    v.literal("mid"),
+    v.literal("senior"),
+    v.literal("lead"),
+    v.literal("director"),
+    v.literal("executive")
+  ),
+  postedBy: v.id("users"), // Reference to the user who posted the job
+  createdAt: v.string(),
+  updatedAt: v.optional(v.string()),
+  isActive: v.boolean(),
+});
+
+const applications = defineTable({
+  jobId: v.id("jobs"), // Reference to the job
+  applicantId: v.id("users"), // Reference to the applicant
+  resumeUrl: v.string(),
+  coverLetter: v.optional(v.string()),
+  status: v.union(
+    v.literal("applied"),
+    v.literal("reviewed"),
+    v.literal("accepted"),
+    v.literal("rejected")
+  ),
+  appliedAt: v.string(),
+  updatedAt: v.optional(v.string()),
+});
+
 const schema = defineSchema({
   ...authTables,
   profile,
@@ -344,6 +396,9 @@ const schema = defineSchema({
   conversationParticipant,
 
   connection,
+
+  jobs,
+  applications,
 });
 
 export default schema;
