@@ -24,7 +24,7 @@ import {
   insertNotification,
   getNotificationsForCurrentUser,
   readNotification,
-  countUnreadNotificationsOfcurrentUser
+  countUnreadNotificationsOfcurrentUser,
 } from "./function/notification.function";
 
 import {
@@ -72,6 +72,8 @@ import {
   getCommonDetailsByUserId,
   allProfileAndOrganizationProfile,
 } from "./function/common.function";
+
+import { postJob, getJobByJobId } from "./function/job.function";
 
 export {
   currentUserId,
@@ -124,5 +126,7 @@ export {
   insertNotification,
   getNotificationsForCurrentUser,
   readNotification,
-  countUnreadNotificationsOfcurrentUser
+  countUnreadNotificationsOfcurrentUser,
+  postJob,
+  getJobByJobId,
 };

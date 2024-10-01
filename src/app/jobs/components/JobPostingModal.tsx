@@ -14,6 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import ReactSelect, { MultiValue, SingleValue } from "react-select";
 import CreatableSelect from "react-select/creatable";
 import axios from "axios";
+import { useMutation } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { toast } from "react-toastify";
 
 // Define option interfaces for select inputs
 interface Option {
@@ -34,14 +37,19 @@ export const JobPostingModal: React.FC<JobPostingModalProps> = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
-  const [employmentType, setEmploymentType] = useState<Option | null>(null);
+  const [employmentType, setEmploymentType] = useState<
+    | "full_time"
+    | "part_time"
+    | "contract"
+    | "internship"
+    | "temporary"
+    | "freelance"
+  >("full_time");
   const [salaryMin, setSalaryMin] = useState<number | "">("");
   const [salaryMax, setSalaryMax] = useState<number | "">("");
   const [currency, setCurrency] = useState<Option | null>(null);
   const [skills, setSkills] = useState<MultiValue<Option>>([]);
   const [experienceLevel, setExperienceLevel] = useState<Option | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   // Define options for select inputs
@@ -56,6 +64,8 @@ export const JobPostingModal: React.FC<JobPostingModalProps> = ({
 
   const [currencyOptions, setCurrencyOptions] = useState<Option[]>([]);
   const [skillOptions, setSkillOptions] = useState<Option[]>([]);
+
+  const postJob = useMutation(api.queries.postJob);
 
   useEffect(() => {
     const fetchCurrencies = async () => {
@@ -102,6 +112,20 @@ export const JobPostingModal: React.FC<JobPostingModalProps> = ({
     fetchSkills();
   }, [isOpen]);
 
+  // Define the resetForm function
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setLocation("");
+    setEmploymentType("full_time");
+    setSalaryMin("");
+    setSalaryMax("");
+    setCurrency(null);
+    setSkills([]);
+    setExperienceLevel(null);
+    setLoading(false);
+  };
+
   // Handle form submission (placeholder)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,35 +141,55 @@ export const JobPostingModal: React.FC<JobPostingModalProps> = ({
       skills.length === 0 ||
       !experienceLevel
     ) {
-      setError("Please fill out all required fields.");
+      toast.error("Please fill out all required fields.");
+      resetForm();
       return;
     }
 
     if (salaryMax && salaryMax < salaryMin) {
-      setError("Maximum salary cannot be less than minimum salary.");
+      toast.error("Maximum salary cannot be less than minimum salary.");
+      resetForm();
       return;
     }
 
-    setError(null);
     setLoading(true);
 
-    // Simulate form submission delay
-    setTimeout(() => {
+    const data = {
+      title: title,
+      description: description,
+      location: location,
+      employmentType: employmentType as
+        | "full_time"
+        | "part_time"
+        | "contract"
+        | "internship"
+        | "temporary"
+        | "freelance",
+      salaryRange: {
+        min: salaryMin,
+        max: salaryMax ? salaryMax : salaryMin,
+        currency: currency.value as string,
+      },
+      skills: skills.map((skill) => skill.value), // List of required skills (can be skill names or IDs)
+      experienceLevel: experienceLevel.value as
+        | "entry"
+        | "mid"
+        | "senior"
+        | "lead"
+        | "director"
+        | "executive",
+    };
+
+    try {
+      await postJob({ data: data });
       setLoading(false);
-      setSuccess(true);
-      // Reset form fields
-      setTitle("");
-      setDescription("");
-      setLocation("");
-      setEmploymentType(null);
-      setSalaryMin("");
-      setSalaryMax("");
-      setCurrency(null);
-      setSkills([]);
-      setExperienceLevel(null);
-      // Optionally close the modal after submission
-      // onClose();
-    }, 2000);
+      toast.success("Job created successfully");
+    } catch (err) {
+      toast.error("Something went wrong");
+    } finally {
+      resetForm();
+      onClose(true);
+    }
   };
 
   return (
@@ -231,8 +275,16 @@ export const JobPostingModal: React.FC<JobPostingModalProps> = ({
               id="employmentType"
               options={employmentTypeOptions}
               value={employmentType}
-              onChange={(option: SingleValue<Option>) =>
-                setEmploymentType(option)
+              onChange={(option: any) =>
+                setEmploymentType(
+                  (option?.value === undefined ? "full_time" : option.value) as
+                    | "full_time"
+                    | "part_time"
+                    | "contract"
+                    | "internship"
+                    | "temporary"
+                    | "freelance"
+                )
               }
               placeholder="Select employment type"
               isClearable
@@ -331,9 +383,8 @@ export const JobPostingModal: React.FC<JobPostingModalProps> = ({
               styles={{
                 multiValue: (baseStyles) => ({
                   ...baseStyles,
-                  backgroundColor: "#acf88d"
+                  backgroundColor: "#acf88d",
                 }),
-                
               }}
               classNamePrefix="react-select"
             />
@@ -361,13 +412,14 @@ export const JobPostingModal: React.FC<JobPostingModalProps> = ({
             />
           </div>
 
-          {/* Error and Success Messages */}
-          {error && <p className="text-red-500">{error}</p>}
-          {success && <p className="text-green-500">Job posting created!</p>}
-
           {/* Submit Button */}
-          <Button type="submit" disabled={loading} className="mt-4 w-full">
-            {loading ? "Creating..." : "Create Job Posting"}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="mt-4 w-full"
+            onClick={handleSubmit}
+          >
+            {"Create Job Posting"}
           </Button>
         </form>
       </DialogContent>

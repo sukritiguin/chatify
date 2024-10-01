@@ -325,7 +325,7 @@ const connection = defineTable({
 // - Below is the schema for jobs section in LinkedIn like application.
 
 const jobs = defineTable({
-  organizationId: v.id("organizations"), // Reference to the organization
+  userId: v.id("users"), // Reference to the organization
   title: v.string(),
   description: v.string(),
   location: v.string(),
