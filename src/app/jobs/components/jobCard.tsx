@@ -19,82 +19,109 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { Job } from "../../../../types/job.interface";
 import { ApplyJobModal } from "./ApplyJobModal";
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import Link from "next/link";
 
 interface JobCardProps {
   job: Job;
-  onApply: (jobId: string) => void;
 }
 
-export const JobCard: React.FC<JobCardProps> = ({ job, onApply }) => {
+export const JobCard: React.FC<JobCardProps> = ({ job }) => {
   const [applyJobModalIsOpen, setApplyJobModalIsOpen] =
     useState<boolean>(false);
 
+  const organization = useQuery(api.queries.getOrganizationByUserId, {
+    userId: job.userId,
+  });
+
+
   const handleApply = () => {
     setApplyJobModalIsOpen(true);
-    onApply(job.id);
   };
 
   return (
     <>
-      <Card className="flex flex-col shadow-md hover:shadow-lg transition-shadow duration-200">
-        <CardHeader className="flex items-center space-x-4 p-4">
-          {job.organizationLogoUrl ? (
-            <Avatar>
+      <Card className="flex flex-col h-full shadow-sm hover:shadow-md transition-shadow duration-200 bg-white rounded-lg border border-gray-200">
+        {/* Card Header */}
+        <CardHeader className="flex items-center space-x-3 p-3">
+          {organization && organization.logo ? (
+            <Avatar className="h-10 w-10">
               <AvatarImage
-                src={job.organizationLogoUrl}
-                alt={`${job.organizationName} logo`}
+                src={organization.logo}
+                alt={`${organization.name} logo`}
               />
-              <AvatarFallback>{job.organizationName.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{organization.name.charAt(0)}</AvatarFallback>
             </Avatar>
           ) : (
-            <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-              <FaStar className="text-white text-xl" />
+            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+              <FaStar className="text-white text-lg" />
             </div>
           )}
           <div>
-            <h3 className="text-lg font-semibold">{job.title}</h3>
-            <p className="text-sm text-gray-600">{job.organizationName}</p>
+            <h3 className="text-md font-semibold text-gray-800">{job.title}</h3>
+            <p className="text-md text-gray-500 hover:text-blue-500 hover:cursor-pointer hover:underline">
+              <Link href={`/organization/${job.userId}`}>
+                {organization?.name}
+              </Link>
+            </p>
           </div>
         </CardHeader>
-        <CardContent className="p-4">
-          <div className="flex items-center text-gray-700 mb-2">
-            <FaMapMarkerAlt className="mr-1" />
-            <span>{job.location}</span>
-          </div>
-          <div className="flex items-center text-gray-700 mb-2">
-            <FaBriefcase className="mr-1" />
-            <span>{job.employmentType.replace("_", " ").toUpperCase()}</span>
-          </div>
-          {job.salaryRange && (
-            <div className="flex items-center text-gray-700 mb-2">
-              <FaDollarSign className="mr-1" />
-              <span>
-                {job.salaryRange.min} {job.salaryRange.currency}
-                {job.salaryRange.max &&
-                  ` - ${job.salaryRange.max} ${job.salaryRange.currency}`}
-              </span>
+
+        {/* Card Content */}
+        <CardContent className="flex-1 px-3 pb-3">
+          {/* Job Metadata */}
+          <div className="flex flex-wrap text-gray-600 text-xs space-x-2">
+            {/* Location */}
+            <div className="flex items-center mr-2">
+              <FaMapMarkerAlt className="mr-1 text-gray-400" />
+              <span>{job.location}</span>
             </div>
-          )}
-          <div className="flex flex-wrap gap-2 mt-2">
+            {/* Employment Type */}
+            <div className="flex items-center mr-2">
+              <FaBriefcase className="mr-1 text-gray-400" />
+              <span>{job.employmentType.replace("_", " ").toUpperCase()}</span>
+            </div>
+            {/* Salary Range */}
+            {job.salaryRange && (
+              <div className="flex items-center">
+                <FaDollarSign className="mr-1 text-gray-400" />
+                <span>
+                  {job.salaryRange.min.toLocaleString()}{" "}
+                  {job.salaryRange.currency}
+                  {job.salaryRange.max &&
+                    ` - ${job.salaryRange.max.toLocaleString()} ${job.salaryRange.currency}`}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Skills */}
+          <div className="flex flex-wrap gap-1 mt-2">
             {job.skills.map((skill, index) => (
               <span
                 key={index}
-                className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded"
+                className="bg-green-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded"
               >
                 {skill}
               </span>
             ))}
           </div>
-          <div className="mt-4">
-            <h4 className="font-semibold">Experience Level:</h4>
-            <p className="text-gray-600">
-              {job.experienceLevel.charAt(0).toUpperCase() +
-                job.experienceLevel.slice(1)}
+
+          {/* Experience Level */}
+          <div className="mt-2">
+            <h4 className="text-xs font-semibold text-gray-700">
+              Experience Level:
+            </h4>
+            <p className="text-xs text-gray-500 capitalize">
+              {job.experienceLevel.replace("_", " ")}
             </p>
           </div>
         </CardContent>
-        <CardFooter className="p-4 flex justify-between items-center">
-          <span className="text-xs text-gray-500">
+
+        {/* Card Footer */}
+        <CardFooter className="flex justify-between items-center p-3">
+          <span className="text-xxs text-gray-500">
             Posted{" "}
             {formatDistanceToNow(new Date(job.createdAt), { addSuffix: true })}
           </span>
@@ -103,15 +130,20 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onApply }) => {
             size="sm"
             onClick={handleApply}
             disabled={!job.isActive}
-            className="bg-indigo-600 hover:bg-indigo-700 hover:text-gray-100 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className={`${
+              job.isActive
+                ? "bg-indigo-600 hover:bg-indigo-700"
+                : "bg-gray-400 cursor-not-allowed"
+            } text-white font-semibold text-xs py-1 px-3 hover:text-white rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           >
             {job.isActive ? "Apply Now" : "Closed"}
           </Button>
         </CardFooter>
       </Card>
 
+      {/* Apply Job Modal */}
       <ApplyJobModal
-        jobId={job.id}
+        jobId={job._id}
         applyJobModalIsOpen={applyJobModalIsOpen}
         setApplyJobModalIsOpen={setApplyJobModalIsOpen}
       />

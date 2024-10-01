@@ -33,38 +33,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const commonDetails = useQuery(api.queries.getCommonDetails)
-
-  // const { isLoading, isAuthenticated } = useConvexAuth();
   const isAuthenticated = isAuthenticatedNextjs();
-
-  if (!isAuthenticated) {
-    return (
-      <ConvexAuthNextjsServerProvider>
-        <html lang="en">
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
-          >
-            <ConvexClientProvider>
-              <div className="flex flex-col min-h-screen">
-                {/* Header */}
-
-                {/* Main Layout Body */}
-                <div className="flex-grow container mx-auto flex py-6 space-x-6">
-                  {/* Left Sidebar */}
-
-                  {/* Main Content Area */}
-                  <main className="flex-grow bg-gray-100 text-gray-900 rounded-lg p-6 shadow">
-                    {children}
-                  </main>
-                </div>
-              </div>
-            </ConvexClientProvider>
-          </body>
-        </html>
-      </ConvexAuthNextjsServerProvider>
-    );
-  }
 
   return (
     <ConvexAuthNextjsServerProvider>
@@ -75,12 +44,12 @@ export default function RootLayout({
           <ConvexClientProvider>
             <div className="flex flex-col min-h-screen">
               {/* Header */}
-              <Header />
+              {isAuthenticated && <Header />}
 
               {/* Main Layout Body */}
-              <div className="flex-grow container mx-auto flex py-6 space-x-6">
+              <div className="flex-grow flex py-6">
                 {/* Left Sidebar */}
-                <LeftSideBar />
+                {isAuthenticated && <LeftSideBar />}
 
                 {/* Main Content Area */}
                 <main className="flex-grow bg-gray-100 text-gray-900 rounded-lg p-6 shadow">
@@ -88,59 +57,42 @@ export default function RootLayout({
                 </main>
 
                 {/* Right Sidebar */}
-                <aside className="w-64 hidden lg:block">
-                  <div className="bg-white rounded-lg shadow p-4">
-                    <h3 className="font-bold text-gray-700 mb-4">
-                      Who to follow
-                    </h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-3">
-                        <Avatar>
-                          <AvatarImage
-                            src="https://via.placeholder.com/150"
-                            alt="User"
-                          />
-                          <AvatarFallback>A</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h4 className="text-sm font-semibold">
-                            Alice Johnson
-                          </h4>
-                          <p className="text-xs text-gray-500">
-                            Product Manager
-                          </p>
-                          <Button
-                            variant="link"
-                            className="text-blue-600 text-xs"
-                          >
-                            Follow
-                          </Button>
+                {isAuthenticated && (
+                  <aside className="w-64 flex-shrink-0 mx-2">
+                    <div className="bg-white rounded-lg shadow p-4">
+                      <h3 className="font-bold text-gray-700 mb-4">
+                        Who to follow
+                      </h3>
+                      <div className="space-y-4">
+                        {/* User Example */}
+                        <div className="flex items-center space-x-3">
+                          <Avatar>
+                            <AvatarImage
+                              src="https://via.placeholder.com/150"
+                              alt="User"
+                            />
+                            <AvatarFallback>A</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h4 className="text-sm font-semibold">
+                              Alice Johnson
+                            </h4>
+                            <p className="text-xs text-gray-500">
+                              Product Manager
+                            </p>
+                            <Button
+                              variant="link"
+                              className="text-blue-600 text-xs"
+                            >
+                              Follow
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Avatar>
-                          <AvatarImage
-                            src="https://via.placeholder.com/150"
-                            alt="User"
-                          />
-                          <AvatarFallback>B</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h4 className="text-sm font-semibold">Bob Smith</h4>
-                          <p className="text-xs text-gray-500">
-                            Data Scientist
-                          </p>
-                          <Button
-                            variant="link"
-                            className="text-blue-600 text-xs"
-                          >
-                            Follow
-                          </Button>
-                        </div>
+                        {/* Add more users as needed */}
                       </div>
                     </div>
-                  </div>
-                </aside>
+                  </aside>
+                )}
               </div>
 
               {/* Footer */}
@@ -150,6 +102,7 @@ export default function RootLayout({
                 </div>
               </footer>
             </div>
+
             <ToastContainer
               position="top-right"
               autoClose={5000}

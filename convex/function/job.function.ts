@@ -78,3 +78,21 @@ export const getJobByJobId = query({
     return job;
   },
 });
+
+export const getAllActiveJobs = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const jobs = await ctx.db
+      .query("jobs")
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .collect();
+
+    return jobs;
+  },
+});

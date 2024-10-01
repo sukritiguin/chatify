@@ -9,7 +9,7 @@ export const LeftSideBar = () => {
   const commonDetails = useQuery(api.queries.getCommonDetails);
 
   return (
-    <aside className="w-64 hidden md:block">
+    <aside className="w-64 hidden md:block flex-shrink-0 mx-2">
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex items-center space-x-4 mb-6">
           <Avatar>
