@@ -96,3 +96,50 @@ export const getAllActiveJobs = query({
     return jobs;
   },
 });
+
+export const getAllLocationsAndSkillsFromJobs = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    let locations: string[] = [];
+    let skills: string[] = [];
+
+    const jobs = await ctx.db.query("jobs").collect();
+
+    for (const job of jobs) {
+      locations = [...locations, job.location];
+      skills = [...skills, ...job.skills];
+    }
+
+    return {
+      locations: locations || [],
+      skills: skills || [],
+    };
+  },
+});
+
+export const mapUserIdWithOrganizationsForJobs = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const organizations = await ctx.db.query("organizations").collect();
+
+    const data = new Map();
+
+    for (const organization of organizations) {
+      data.set(organization.adminUserId, organization.name);
+    }
+
+    return Object.fromEntries(data.entries());
+  },
+});

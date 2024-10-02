@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/SearchFilter.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaFilter, FaSearch, FaTimes } from "react-icons/fa";
 import SearchableDropdown from "./SearchableDropdown";
 import {
@@ -9,8 +9,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import { Job } from "../../../../types/job.interface";
 
-export const SearchFilter = () => {
+interface SearchFilterProps {
+  jobs: Job[] | undefined;
+  setJobs: React.Dispatch<React.SetStateAction<Job[] | undefined>>;
+}
+
+export const SearchFilter = ({ jobs, setJobs }: SearchFilterProps) => {
   // State for search and filters
   const [searchTerm, setSearchTerm] = useState("");
   const [employmentType, setEmploymentType] = useState("All");
@@ -21,8 +29,23 @@ export const SearchFilter = () => {
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] =
     useState<boolean>(false);
 
-  const allLocations = ["Kolkata", "Mumbai", "Delhi", "Bangalore", "Hyderabad"];
-  const allSkills = ["Java", "Python", "C++", "AWS"];
+  const locationsAndSkills = useQuery(
+    api.queries.getAllLocationsAndSkillsFromJobs
+  );
+
+  const mappedUserIdandOrganization = useQuery(
+    api.queries.mapUserIdWithOrganizationsForJobs
+  );
+
+  useEffect(() => {
+    console.log(selectedLocations);
+  }, [selectedLocations]);
+
+  const allListedJobs = useQuery(api.queries.getAllActiveJobs);
+
+  // Extract unique locations and skills using Set
+  const allLocations = Array.from(new Set(locationsAndSkills?.locations || []));
+  const allSkills = Array.from(new Set(locationsAndSkills?.skills || []));
 
   // Employment Type Options
   const employmentTypes = [
@@ -47,8 +70,10 @@ export const SearchFilter = () => {
   ];
 
   // Handler functions
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    console.log(e.target.value, searchTerm);
+  };
 
   const handleEmploymentTypeChange = (type: string) => setEmploymentType(type);
 
@@ -78,6 +103,60 @@ export const SearchFilter = () => {
     setSelectedSkills([]);
   };
 
+  useEffect(() => {
+    if (jobs !== undefined && allListedJobs) {
+      const filteredJobs = allListedJobs.filter((job) => {
+        const matchesSearchTerm =
+          searchTerm === "" ||
+          job.title
+            .toLocaleLowerCase()
+            .includes(searchTerm.toLocaleLowerCase()) ||
+          job.description
+            .toLocaleLowerCase()
+            .includes(searchTerm.toLocaleLowerCase()) ||
+          (mappedUserIdandOrganization[job.userId] &&
+            mappedUserIdandOrganization[job.userId]
+              .toLocaleLowerCase()
+              .includes(searchTerm.toLocaleLowerCase()));
+
+        const matchesLocation =
+          selectedLocations.length === 0 ||
+          selectedLocations.includes(job.location);
+
+        const matchesSkill =
+          selectedSkills.length === 0 ||
+          selectedSkills.some((skill) => job.skills.includes(skill));
+
+        const matchesEmploymentType =
+          employmentType === "All" ||
+          employmentType.toLocaleLowerCase().replace(" ", "_") ===
+            job.employmentType;
+
+        const matchesExperienceLevel =
+          experienceLevel === "All" ||
+          experienceLevel.toLocaleLowerCase().replace(" ", "_") ===
+            job.experienceLevel;
+
+        return (
+          matchesSearchTerm &&
+          matchesLocation &&
+          matchesSkill &&
+          matchesEmploymentType &&
+          matchesExperienceLevel
+        );
+      });
+
+      setJobs(filteredJobs);
+    }
+  }, [
+    searchTerm,
+    allListedJobs,
+    selectedLocations,
+    selectedSkills,
+    employmentType,
+    experienceLevel,
+  ]);
+
   return (
     <div className="flex flex-col space-y-2 my-2 w-full mx-auto mt-0">
       {/* Search Input */}
@@ -102,9 +181,9 @@ export const SearchFilter = () => {
           {/* Employment Type Filter */}
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <button className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+              <div className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
                 <FaFilter className="mr-2" /> Employment Type: {employmentType}
-              </button>
+              </div>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="bg-white border border-gray-200 rounded-lg shadow-md">
@@ -125,9 +204,9 @@ export const SearchFilter = () => {
           {/* Experience Level Filter */}
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <button className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
+              <div className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
                 <FaFilter className="mr-2" /> Experience: {experienceLevel}
-              </button>
+              </div>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent className="w-56 bg-white border border-gray-200 rounded-lg shadow-md">
@@ -148,16 +227,17 @@ export const SearchFilter = () => {
           {/* Location Filter */}
           <SearchableDropdown
             label="Locations"
-            options={allLocations}
+            options={allLocations || []}
             selectedOptions={selectedLocations}
             toggleOption={toggleLocation}
             buttonColor="bg-purple-500"
           />
 
           {/* Skills Filter */}
+
           <SearchableDropdown
             label="Skills"
-            options={allSkills}
+            options={allSkills || []}
             selectedOptions={selectedSkills}
             toggleOption={toggleSkill}
             buttonColor="bg-yellow-500"

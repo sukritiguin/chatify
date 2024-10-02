@@ -52,11 +52,11 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <button
+        <span
           className={`flex items-center px-4 py-2 ${buttonColor} text-white rounded-lg hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-opacity-50`}
         >
           <FaFilter className="mr-2" /> {label}
-        </button>
+        </span>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent

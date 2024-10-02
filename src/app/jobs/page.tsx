@@ -1,7 +1,7 @@
 // src/pages/jobs/index.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Job } from "../../../types/job.interface";
 import { JobPostingModal } from "./components/JobPostingModal";
 import { FaPlus } from "react-icons/fa";
@@ -13,9 +13,14 @@ import { SearchFilter } from "./components/SearchFilter";
 const JobsPage: React.FC = () => {
   const [isJobPostingModalOpen, setIsJobPostingModalOpen] =
     useState<boolean>(false);
+  const [jobs, setJobs] = useState<Job[]>();
 
   const allListedJobs = useQuery(api.queries.getAllActiveJobs);
   const getUserType = useQuery(api.queries.getUserRegistration);
+
+  useEffect(() => {
+    setJobs(allListedJobs);
+  }, [allListedJobs]);
 
   return (
     <>
@@ -26,7 +31,7 @@ const JobsPage: React.FC = () => {
             Find Jobs
           </h1>
           {/* SearchFilter placed under h1 */}
-          <SearchFilter />
+          <SearchFilter jobs={jobs} setJobs={setJobs}/>
         </div>
 
         {/* Post a Job Button */}
@@ -44,8 +49,8 @@ const JobsPage: React.FC = () => {
 
         {/* Grid Layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {allListedJobs && allListedJobs.length > 0 ? (
-            allListedJobs.map((job: Job) => <JobCard key={job._id} job={job} />)
+          {jobs && jobs.length > 0 ? (
+            jobs.map((job: Job) => <JobCard key={job._id} job={job} />)
           ) : (
             <p className="text-center col-span-full text-gray-500">
               No jobs available at the moment.

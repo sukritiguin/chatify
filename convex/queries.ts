@@ -73,7 +73,13 @@ import {
   allProfileAndOrganizationProfile,
 } from "./function/common.function";
 
-import { postJob, getJobByJobId, getAllActiveJobs } from "./function/job.function";
+import {
+  postJob,
+  getJobByJobId,
+  getAllActiveJobs,
+  getAllLocationsAndSkillsFromJobs,
+  mapUserIdWithOrganizationsForJobs
+} from "./function/job.function";
 
 export {
   currentUserId,
@@ -129,5 +135,7 @@ export {
   countUnreadNotificationsOfcurrentUser,
   postJob,
   getJobByJobId,
-  getAllActiveJobs
+  getAllActiveJobs,
+  getAllLocationsAndSkillsFromJobs,
+  mapUserIdWithOrganizationsForJobs
 };
