@@ -22,6 +22,7 @@ import { ApplyJobModal } from "./ApplyJobModal";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import Link from "next/link";
+import JobDetailsModal from "./JobDetailsModal";
 
 interface JobCardProps {
   job: Job;
@@ -31,10 +32,12 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
   const [applyJobModalIsOpen, setApplyJobModalIsOpen] =
     useState<boolean>(false);
 
+  const [isJobDetailsModalOpen, setIsJobDetailsModalOpen] =
+    useState<boolean>(false);
+
   const organization = useQuery(api.queries.getOrganizationByUserId, {
     userId: job.userId,
   });
-
 
   const handleApply = () => {
     setApplyJobModalIsOpen(true);
@@ -69,7 +72,10 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
         </CardHeader>
 
         {/* Card Content */}
-        <CardContent className="flex-1 px-3 pb-3">
+        <CardContent
+          className="flex-1 px-3 pb-3 hover:cursor-pointer"
+          onClick={() => setIsJobDetailsModalOpen(true)}
+        >
           {/* Job Metadata */}
           <div className="flex flex-wrap text-gray-600 text-xs space-x-2">
             {/* Location */}
@@ -147,6 +153,15 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
         applyJobModalIsOpen={applyJobModalIsOpen}
         setApplyJobModalIsOpen={setApplyJobModalIsOpen}
       />
+
+      {isJobDetailsModalOpen && (
+        <JobDetailsModal
+          isOpen={isJobDetailsModalOpen}
+          onClose={setIsJobDetailsModalOpen}
+          job={job}
+          organization={organization}
+        />
+      )}
     </>
   );
 };

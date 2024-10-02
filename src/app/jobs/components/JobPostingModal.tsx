@@ -10,13 +10,15 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import {RichTextEditor} from "./RichTextEditor";
 import ReactSelect, { MultiValue, SingleValue } from "react-select";
 import CreatableSelect from "react-select/creatable";
 import axios from "axios";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { toast } from "react-toastify";
+import DOMPurify from 'dompurify'; // For sanitizing HTML content
+
 
 // Define option interfaces for select inputs
 interface Option {
@@ -154,9 +156,11 @@ export const JobPostingModal: React.FC<JobPostingModalProps> = ({
 
     setLoading(true);
 
+    const sanitizedDescription = DOMPurify.sanitize(description);
+
     const data = {
       title: title,
-      description: description,
+      description: sanitizedDescription,
       location: location,
       employmentType: employmentType as
         | "full_time"
@@ -233,7 +237,7 @@ export const JobPostingModal: React.FC<JobPostingModalProps> = ({
             >
               Job Description <span className="text-red-500">*</span>
             </label>
-            <Textarea
+            {/* <Textarea
               id="description"
               placeholder="Provide a detailed description of the job..."
               value={description}
@@ -241,7 +245,8 @@ export const JobPostingModal: React.FC<JobPostingModalProps> = ({
               required
               className="mt-1"
               rows={5}
-            />
+            /> */}
+            <RichTextEditor value={description} onChange={setDescription} />
           </div>
 
           {/* Location */}
