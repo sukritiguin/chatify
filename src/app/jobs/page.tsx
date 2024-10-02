@@ -8,11 +8,11 @@ import { FaPlus } from "react-icons/fa";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { JobCard } from "./components/jobCard";
+import { SearchFilter } from "./components/SearchFilter";
 
 const JobsPage: React.FC = () => {
   const [isJobPostingModalOpen, setIsJobPostingModalOpen] =
     useState<boolean>(false);
-
 
   const allListedJobs = useQuery(api.queries.getAllActiveJobs);
   const getUserType = useQuery(api.queries.getUserRegistration);
@@ -21,11 +21,17 @@ const JobsPage: React.FC = () => {
     <>
       <div className="container mx-auto px-4">
         {/* Header Section */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-extrabold text-gray-900">
-            Available Job Listings
+        <div className="flex flex-col justify-between mb-6">
+          <h1 className="text-3xl font-extrabold text-gray-900 mb-4">
+            Find Jobs
           </h1>
-          {getUserType?.type === "organization" && (
+          {/* SearchFilter placed under h1 */}
+          <SearchFilter />
+        </div>
+
+        {/* Post a Job Button */}
+        {getUserType?.type === "organization" && (
+          <div className="mb-6">
             <button
               onClick={() => setIsJobPostingModalOpen(true)}
               className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -33,8 +39,8 @@ const JobsPage: React.FC = () => {
               <FaPlus className="mr-2" />
               Post a Job
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Grid Layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -53,8 +59,6 @@ const JobsPage: React.FC = () => {
         isOpen={isJobPostingModalOpen}
         onClose={() => setIsJobPostingModalOpen(false)}
       />
-
-      
     </>
   );
 };
