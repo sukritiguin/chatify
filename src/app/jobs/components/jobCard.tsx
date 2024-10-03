@@ -16,6 +16,7 @@ import {
   FaDollarSign,
   FaStar,
 } from "react-icons/fa";
+import { SiLevelsdotfyi } from "react-icons/si";
 import { formatDistanceToNow } from "date-fns";
 import { Job } from "../../../../types/job.interface";
 import { ApplyJobModal } from "./ApplyJobModal";
@@ -38,6 +39,15 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
   const organization = useQuery(api.queries.getOrganizationByUserId, {
     userId: job.userId,
   });
+
+  const countApplications = useQuery(api.queries.countApplicantByJobId, {
+    jobId: job._id,
+  });
+
+  const isCurrentUserAlreadyAppliedToThisJobId = useQuery(
+    api.queries.isCurrentUserAlreadyAppliedToThisJobId,
+    { jobId: job._id }
+  );
 
   const handleApply = () => {
     setApplyJobModalIsOpen(true);
@@ -88,9 +98,16 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
               <FaBriefcase className="mr-1 text-gray-400" />
               <span>{job.employmentType.replace("_", " ").toUpperCase()}</span>
             </div>
+            <div className="flex items-center mr-2">
+              <SiLevelsdotfyi className="mr-1 text-gray-400" />
+              <span>
+                {job.experienceLevel.toLocaleUpperCase().replace("_", " ")}{" "}
+                Level
+              </span>
+            </div>
             {/* Salary Range */}
             {job.salaryRange && (
-              <div className="flex items-center">
+              <div className="flex items-center ml-0">
                 <FaDollarSign className="mr-1 text-gray-400" />
                 <span>
                   {job.salaryRange.min.toLocaleString()}{" "}
@@ -116,12 +133,9 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
 
           {/* Experience Level */}
           <div className="mt-2">
-            <h4 className="text-xs font-semibold text-gray-700">
-              Experience Level:
+            <h4 className="text-xs font-semibold text-blue-400 flex">
+              {countApplications} applicants
             </h4>
-            <p className="text-xs text-gray-500 capitalize">
-              {job.experienceLevel.replace("_", " ")}
-            </p>
           </div>
         </CardContent>
 
@@ -135,14 +149,20 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
             variant="outline"
             size="sm"
             onClick={handleApply}
-            disabled={!job.isActive}
+            disabled={!job.isActive || isCurrentUserAlreadyAppliedToThisJobId}
             className={`${
               job.isActive
-                ? "bg-indigo-600 hover:bg-indigo-700"
+                ? isCurrentUserAlreadyAppliedToThisJobId
+                  ? "bg-green-500 hover:bg-green-600"
+                  : "bg-indigo-600 hover:bg-indigo-700"
                 : "bg-gray-400 cursor-not-allowed"
             } text-white font-semibold text-xs py-1 px-3 hover:text-white rounded-md shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           >
-            {job.isActive ? "Apply Now" : "Closed"}
+            {job.isActive
+              ? isCurrentUserAlreadyAppliedToThisJobId
+                ? "Applied"
+                : "Apply Now"
+              : "Closed"}
           </Button>
         </CardFooter>
       </Card>

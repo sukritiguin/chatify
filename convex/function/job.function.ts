@@ -143,3 +143,78 @@ export const mapUserIdWithOrganizationsForJobs = query({
     return Object.fromEntries(data.entries());
   },
 });
+
+export const applyJob = mutation({
+  args: {
+    jobId: v.id("jobs"),
+    resumeUrl: v.string(),
+    coverLetterUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const job = await ctx.db.get(args.jobId);
+    if (!job?.isActive) {
+      throw new Error("Job not active!");
+    }
+
+    await ctx.db.insert("applications", {
+      applicantId: userId,
+      jobId: args.jobId,
+      resumeUrl: args.resumeUrl,
+      coverLetter: args.coverLetterUrl || undefined,
+      status: "applied" as
+        | "accepted"
+        | "rejected"
+        | "applied"
+        | "shortlisted"
+        | "hired",
+      appliedAt: new Date().toString(),
+    });
+  },
+});
+
+export const countApplicantByJobId = query({
+  args: { jobId: v.id("jobs") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const applications = await ctx.db
+      .query("applications")
+      .filter((q) => q.eq(q.field("jobId"), args.jobId))
+      .collect()
+      .then((applications) => applications.length);
+
+    return applications;
+  },
+});
+
+export const isCurrentUserAlreadyAppliedToThisJobId = query({
+  args: { jobId: v.id("jobs") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized access!");
+    }
+
+    const application = await ctx.db
+      .query("applications")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("jobId"), args.jobId),
+          q.eq(q.field("applicantId"), userId)
+        )
+      )
+      .first();
+
+    return application ? true : false;
+  },
+});

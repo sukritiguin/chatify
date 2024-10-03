@@ -78,7 +78,10 @@ import {
   getJobByJobId,
   getAllActiveJobs,
   getAllLocationsAndSkillsFromJobs,
-  mapUserIdWithOrganizationsForJobs
+  mapUserIdWithOrganizationsForJobs,
+  applyJob,
+  countApplicantByJobId,
+  isCurrentUserAlreadyAppliedToThisJobId
 } from "./function/job.function";
 
 export {
@@ -137,5 +140,8 @@ export {
   getJobByJobId,
   getAllActiveJobs,
   getAllLocationsAndSkillsFromJobs,
-  mapUserIdWithOrganizationsForJobs
+  mapUserIdWithOrganizationsForJobs,
+  applyJob,
+  countApplicantByJobId,
+  isCurrentUserAlreadyAppliedToThisJobId
 };

@@ -366,9 +366,10 @@ const applications = defineTable({
   coverLetter: v.optional(v.string()),
   status: v.union(
     v.literal("applied"),
-    v.literal("reviewed"),
+    v.literal("shortlisted"),
     v.literal("accepted"),
-    v.literal("rejected")
+    v.literal("rejected"),
+    v.literal("hired")
   ),
   appliedAt: v.string(),
   updatedAt: v.optional(v.string()),
