@@ -218,3 +218,38 @@ export const isCurrentUserAlreadyAppliedToThisJobId = query({
     return application ? true : false;
   },
 });
+
+export const getAllJobListing = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized access!");
+
+    const jobs = await ctx.db
+      .query("jobs")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .collect();
+
+    const result = [];
+
+    for (const job of jobs) {
+      const count = (
+        await ctx.db
+          .query("applications")
+          .filter((q) => q.eq(q.field("jobId"), job._id))
+          .collect()
+      ).length;
+
+      const data = {
+        jobId: job._id,
+        jobTitle: job.title,
+        createdAt: job.createdAt,
+        totalApplicants: count,
+      };
+
+      result.push(data);
+    }
+
+    return result;
+  },
+});

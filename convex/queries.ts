@@ -81,7 +81,8 @@ import {
   mapUserIdWithOrganizationsForJobs,
   applyJob,
   countApplicantByJobId,
-  isCurrentUserAlreadyAppliedToThisJobId
+  isCurrentUserAlreadyAppliedToThisJobId,
+  getAllJobListing
 } from "./function/job.function";
 
 export {
@@ -143,5 +144,6 @@ export {
   mapUserIdWithOrganizationsForJobs,
   applyJob,
   countApplicantByJobId,
-  isCurrentUserAlreadyAppliedToThisJobId
+  isCurrentUserAlreadyAppliedToThisJobId,
+  getAllJobListing
 };

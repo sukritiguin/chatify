@@ -9,9 +9,13 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { JobCard } from "./components/jobCard";
 import { SearchFilter } from "./components/SearchFilter";
+import { JobListingModal } from "./components/JobListing";
+import { FcDocument } from "react-icons/fc";
 
 const JobsPage: React.FC = () => {
   const [isJobPostingModalOpen, setIsJobPostingModalOpen] =
+    useState<boolean>(false);
+  const [isJobListingModalOpen, setIsJobListingModalOpen] =
     useState<boolean>(false);
   const [jobs, setJobs] = useState<Job[]>();
 
@@ -31,18 +35,25 @@ const JobsPage: React.FC = () => {
             Find Jobs
           </h1>
           {/* SearchFilter placed under h1 */}
-          <SearchFilter jobs={jobs} setJobs={setJobs}/>
+          <SearchFilter jobs={jobs} setJobs={setJobs} />
         </div>
 
         {/* Post a Job Button */}
         {getUserType?.type === "organization" && (
-          <div className="mb-6">
+          <div className="mb-6 flex">
             <button
               onClick={() => setIsJobPostingModalOpen(true)}
               className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <FaPlus className="mr-2" />
               Post a Job
+            </button>
+            <button
+              onClick={() => setIsJobListingModalOpen(true)}
+              className="flex ml-4 items-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <FcDocument className="mr-2" />
+              Show Job Listing
             </button>
           </div>
         )}
@@ -63,6 +74,12 @@ const JobsPage: React.FC = () => {
       <JobPostingModal
         isOpen={isJobPostingModalOpen}
         onClose={() => setIsJobPostingModalOpen(false)}
+      />
+
+      {/* Job Listing Modal for Companies */}
+      <JobListingModal
+        isOpen={isJobListingModalOpen}
+        setIsOpen={setIsJobListingModalOpen}
       />
     </>
   );
