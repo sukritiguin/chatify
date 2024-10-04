@@ -253,3 +253,51 @@ export const getAllJobListing = query({
     return result;
   },
 });
+
+// Define a function to map status to their order
+const getStatusOrder = (status: string) => {
+  switch (status) {
+    case "hired":
+      return 4;
+    case "applied":
+      return -1;
+    case "accepted":
+      return 2;
+    case "rejected":
+      return 1;
+    default:
+      return 0; // Default for unknown statuses
+  }
+};
+
+export const getAllApplications = query({
+  args: { jobId: v.id("jobs") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized access!");
+
+    const applications = await ctx.db
+      .query("applications")
+      .filter((q) => q.eq(q.field("jobId"), args.jobId))
+      .collect();
+
+    // Sort applications based on status
+    const sortedApplications = applications.sort((a, b) => {
+      return getStatusOrder(a.status) - getStatusOrder(b.status);
+    });
+
+    return sortedApplications;
+  },
+});
+
+export const shortListApplicant = mutation({
+  args: { applicationId: v.id("applications"), isShortlisted: v.boolean() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized access!");
+
+    await ctx.db.patch(args.applicationId, {
+      status: args.isShortlisted ? "shortlisted" : "rejected",
+    });
+  },
+});

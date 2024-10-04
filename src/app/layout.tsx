@@ -58,7 +58,7 @@ export default function RootLayout({
 
                 {/* Right Sidebar */}
                 {isAuthenticated && (
-                  <aside className="w-64 flex-shrink-0 mx-2">
+                  <aside className="w-64 flex-shrink-0 mx-2 hidden lg:block">
                     <div className="bg-white rounded-lg shadow p-4">
                       <h3 className="font-bold text-gray-700 mb-4">
                         Who to follow

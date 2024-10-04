@@ -82,7 +82,9 @@ import {
   applyJob,
   countApplicantByJobId,
   isCurrentUserAlreadyAppliedToThisJobId,
-  getAllJobListing
+  getAllJobListing,
+  getAllApplications,
+  shortListApplicant,
 } from "./function/job.function";
 
 export {
@@ -145,5 +147,7 @@ export {
   applyJob,
   countApplicantByJobId,
   isCurrentUserAlreadyAppliedToThisJobId,
-  getAllJobListing
+  getAllJobListing,
+  getAllApplications,
+  shortListApplicant,
 };
