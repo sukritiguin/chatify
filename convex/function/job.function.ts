@@ -244,6 +244,7 @@ export const getAllJobListing = query({
         jobId: job._id,
         jobTitle: job.title,
         createdAt: job.createdAt,
+        isActive: job.isActive,
         totalApplicants: count,
       };
 
@@ -301,3 +302,26 @@ export const shortListApplicant = mutation({
     });
   },
 });
+
+export const closeJobByJobId = mutation({
+  args: {jobId: v.id("jobs")},
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if(!userId) {
+      throw new Error("Unauthorized Access!");
+    }
+
+    const job = await ctx.db.get(args.jobId);
+
+    if(job?.userId !== userId) {
+      throw new Error("You are not allowed to update this job.");
+    }
+
+    if(!job.isActive){
+      throw new Error("Job is already closed.");
+    }
+
+    await ctx.db.patch(args.jobId, {isActive: false});
+  }
+})

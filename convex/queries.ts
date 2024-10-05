@@ -85,6 +85,7 @@ import {
   getAllJobListing,
   getAllApplications,
   shortListApplicant,
+  closeJobByJobId
 } from "./function/job.function";
 
 export {
@@ -150,4 +151,5 @@ export {
   getAllJobListing,
   getAllApplications,
   shortListApplicant,
+  closeJobByJobId
 };

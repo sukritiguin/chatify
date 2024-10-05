@@ -10,9 +10,10 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
+import Link from "next/link";
 
 interface JobListingModalProps {
   isOpen: boolean;
@@ -23,12 +24,21 @@ export const JobListingModal = ({
   isOpen,
   setIsOpen,
 }: JobListingModalProps) => {
-  const listedJobs: {
-    jobId: Id<"jobs">;
-    jobTitle: string;
-    createdAt: string; // assuming job.createdAt is a Date object
-    totalApplicants: number;
-  }[] | undefined = useQuery(api.queries.getAllJobListing);
+  const listedJobs:
+    | {
+        jobId: Id<"jobs">;
+        jobTitle: string;
+        createdAt: string; // assuming job.createdAt is a Date object
+        totalApplicants: number;
+        isActive: boolean;
+      }[]
+    | undefined = useQuery(api.queries.getAllJobListing);
+
+  const closeJob = useMutation(api.queries.closeJobByJobId);
+
+  const closeJobHandler = async (jobId: Id<"jobs">) => {
+    await closeJob({ jobId: jobId });
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -47,7 +57,7 @@ export const JobListingModal = ({
               {listedJobs.map((job) => (
                 <li
                   key={job.jobId}
-                  className="p-6 bg-gray-50 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow"
+                  className={`p-6 bg-gray-50 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow`}
                 >
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="text-xl font-medium text-gray-800">
@@ -64,14 +74,24 @@ export const JobListingModal = ({
                       </span>
                     </div>
                   </div>
-                  <div className="mt-2">
-                    <a
+                  <div className="mt-2 flex justify-between">
+                    <Link
                       href={`/jobs/${job.jobId}/applications`}
                       className="inline-flex items-center text-blue-500 font-medium hover:text-blue-700 transition-colors"
                     >
                       <FiLink className="mr-1" />
                       View all applications
-                    </a>
+                    </Link>
+                    {job.isActive && (
+                      <div className="flex justify-end text-xs">
+                        <Button
+                          className="mx-1 my-1 px-2 py-0 bg-red-500 hover:bg-red-400 hover:cursor-pointer"
+                          onClick={() => closeJobHandler(job.jobId)}
+                        >
+                          Close Job
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </li>
               ))}
