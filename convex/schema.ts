@@ -375,6 +375,168 @@ const applications = defineTable({
   updatedAt: v.optional(v.string()),
 });
 
+// -----------------------------------
+// - Professional Test System Tables
+// -----------------------------------
+// 1. Tests Table
+const tests = defineTable({
+  title: v.string(), // Title of the test
+  description: v.optional(v.string()), // Description of the test
+  createdAt: v.string(), // ISO timestamp of test creation
+  createdBy: v.id("users"), // Reference to the user who created the test
+  duration: v.int64(), // Total duration of the test in minutes
+  isActive: v.boolean(), // Indicates if the test is currently active
+  accessType: v.union(
+    v.literal("public"), // Anyone can take the test
+    v.literal("private") // Only invited candidates can take the test
+  ),
+  maxAttempts: v.optional(v.int64()), // Maximum number of attempts allowed per candidate
+  passScore: v.optional(v.float64()), // Minimum score required to pass
+  randomizedQuestions: v.optional(v.boolean()), // If true, questions are randomized per candidate
+  randomizedOptions: v.optional(v.boolean()), // If true, options are randomized per question
+  testVersion: v.optional(v.string()), // Versioning for test updates
+  tags: v.optional(v.array(v.string())), // Tags or categories for the test
+  instructions: v.optional(v.string()), // General instructions for the test
+});
+
+// 2. Sections Table
+const sections = defineTable({
+  testId: v.id("tests"), // Foreign key to the test
+  title: v.string(), // Title of the section
+  instructions: v.optional(v.string()), // Specific instructions for the section
+  sectionOrder: v.int64(), // Order of the section within the test
+  duration: v.optional(v.int64()), // Duration for the section (optional)
+  isMandatory: v.optional(v.boolean()), // If the section is mandatory
+});
+
+// 3. Question Banks Table
+const questionBanks = defineTable({
+  title: v.string(), // Title of the question bank
+  description: v.optional(v.string()), // Description of the question bank
+  createdAt: v.string(), // Timestamp when the question bank was created
+  createdBy: v.id("users"), // Reference to the user who created the question bank
+  tags: v.optional(v.array(v.string())), // Tags or categories for the question bank
+});
+
+// 4. Questions Table
+const questions = defineTable({
+  questionBankId: v.optional(v.id("questionBanks")), // Optional reference to a question bank for reusability
+  sectionId: v.id("sections"), // Foreign key to the section
+  type: v.union(
+    v.literal("MCQ"), // Multiple Choice Question
+    v.literal("MSQ"), // Multiple Select Question
+    v.literal("Essay"), // Essay Question
+    v.literal("Coding"), // Coding/Programming Question
+    v.literal("TrueFalse") // True/False Question
+  ),
+  questionText: v.string(), // The text of the question
+  createdAt: v.string(), // Timestamp when the question was created
+  order: v.int64(), // Order of the question in the section
+  isActive: v.boolean(), // Indicates if the question is active
+  points: v.float64(), // Points assigned to the question
+  hints: v.optional(v.array(v.string())), // Optional hints for the question
+  attachments: v.optional(v.array(v.string())), // URLs to any attachments (images, PDFs, etc.)
+});
+
+// 5. Options Table
+const options = defineTable({
+  questionId: v.id("questions"), // Foreign key to the question
+  optionText: v.string(), // Text of the option
+  isCorrect: v.boolean(), // Whether the option is correct
+  optionOrder: v.int64(), // Order of the option in the question
+  feedback: v.optional(v.string()), // Optional feedback for the option
+});
+
+// 6. Test Assignments Table
+const testAssignments = defineTable({
+  testId: v.id("tests"), // Foreign key to the test
+  candidateId: v.id("users"), // Reference to the candidate (user)
+  assignedAt: v.string(), // Timestamp when the test was assigned
+  dueDate: v.string(), // Due date for test submission
+  status: v.union(
+    v.literal("assigned"),
+    v.literal("in_progress"),
+    v.literal("completed"),
+    v.literal("overdue")
+  ), // Current status of the test assignment
+  attemptCount: v.int64(), // Number of attempts made
+  lastAttemptAt: v.optional(v.string()), // Timestamp of the last attempt
+});
+
+// 7. Test Submissions Table
+const testSubmissions = defineTable({
+  assignmentId: v.id("testAssignments"), // Foreign key to the test assignment
+  startedAt: v.string(), // Timestamp when the test was started
+  submittedAt: v.optional(v.string()), // Timestamp when the test was submitted
+  score: v.optional(v.float64()), // The score achieved by the candidate
+  duration: v.optional(v.int64()), // Duration taken to complete the test in seconds
+  status: v.union(
+    v.literal("submitted"),
+    v.literal("graded"),
+    v.literal("reviewed")
+  ), // Status of the submission
+  feedback: v.optional(v.string()), // Optional feedback from the evaluator
+  reviewedBy: v.optional(v.id("users")), // Reference to the user who reviewed the submission
+});
+
+// 8. Answers Table
+const answers = defineTable({
+  submissionId: v.id("testSubmissions"), // Foreign key to the test submission
+  questionId: v.id("questions"), // Foreign key to the question
+  selectedOptionIds: v.optional(v.array(v.id("options"))), // Array of selected option IDs (for MCQ/MSQ)
+  essayAnswer: v.optional(v.string()), // Text answer for essay questions
+  codingAnswer: v.optional(v.string()), // Code snippet for coding questions
+  isCorrect: v.optional(v.boolean()), // Whether the answer is correct (for automatic grading)
+  pointsAwarded: v.optional(v.float64()), // Points awarded for this answer
+  answeredAt: v.string(), // Timestamp when the question was answered
+});
+
+// 9. Question Tags Table (for better categorization and searching)
+const questionTags = defineTable({
+  questionId: v.id("questions"), // Foreign key to the question
+  tag: v.string(), // Tag name
+});
+
+// 10. Test Logs Table (for auditing and tracking purposes)
+const testLogs = defineTable({
+  assignmentId: v.id("testAssignments"), // Reference to the test assignment
+  action: v.union(
+    v.literal("assigned"),
+    v.literal("started"),
+    v.literal("submitted"),
+    v.literal("graded"),
+    v.literal("reviewed"),
+    v.literal("updated")
+  ), // Action performed
+  performedBy: v.id("users"), // User who performed the action
+  timestamp: v.string(), // Timestamp of the action
+  details: v.optional(v.string()), // Additional details about the action
+});
+
+// 11. Proctoring Sessions Table (Optional: If implementing proctoring)
+const proctoringSessions = defineTable({
+  submissionId: v.id("testSubmissions"), // Reference to the test submission
+  proctorId: v.id("users"), // Reference to the proctor (admin)
+  startedAt: v.string(), // Timestamp when proctoring started
+  endedAt: v.optional(v.string()), // Timestamp when proctoring ended
+  activities: v.optional(
+    v.array(
+      v.object({
+        activityType: v.string(), // Type of activity (e.g., screen capture, webcam snapshot)
+        timestamp: v.string(), // When the activity was recorded
+        metadata: v.optional(v.object({})), // Additional data
+      })
+    )
+  ), // Recorded activities during proctoring
+});
+
+// 12. Test Settings Table (For configurable test options)
+const testSettings = defineTable({
+  testId: v.id("tests"), // Reference to the test
+  settingKey: v.string(), // Key/name of the setting
+  settingValue: v.string(), // Value of the setting
+});
+
 const schema = defineSchema({
   ...authTables,
   profile,
@@ -400,6 +562,20 @@ const schema = defineSchema({
 
   jobs,
   applications,
+
+  // - Professional Test System Tables
+  tests,
+  sections,
+  questionBanks,
+  questions,
+  options,
+  testAssignments,
+  testSubmissions,
+  answers,
+  questionTags,
+  testLogs,
+  proctoringSessions,
+  testSettings,
 });
 
 export default schema;
