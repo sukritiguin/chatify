@@ -39,7 +39,8 @@ export const insertNotification = mutation({
     };
 
     console.log({ "notification data": data });
-    await ctx.db.insert("notifications", data);
+    const insertedNotification = await ctx.db.insert("notifications", data);
+    console.log({ "notification data": insertedNotification });
   },
 });
 
@@ -93,5 +94,32 @@ export const countUnreadNotificationsOfcurrentUser = query({
 
     if (!count) return 0;
     return count.length;
+  },
+});
+
+export const markAllNotificationsAsRead = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized access!");
+
+    ctx.db
+      .query("notifications")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .collect()
+      .then((notifications) => {
+        // Return a promise for marking all notifications as read
+        return Promise.all(
+          notifications.map((notification) =>
+            ctx.db.patch(notification._id, { isRead: true })
+          )
+        );
+      })
+      .then(() => {
+        console.log("All notifications marked as read.");
+      })
+      .catch((error) => {
+        console.error("Error marking notifications as read:", error);
+      });
   },
 });

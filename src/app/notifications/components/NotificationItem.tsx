@@ -32,11 +32,13 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
 
   const readNotification = useMutation(api.queries.readNotification);
 
-  const handleNotificationRead = async (notificationId: Id<"notifications">) => {
-    if(notificationId){
-      readNotification({notificationId: notificationId})
+  const handleNotificationRead = async (
+    notificationId: Id<"notifications">
+  ) => {
+    if (notificationId) {
+      readNotification({ notificationId: notificationId });
     }
-  }
+  };
   if (!notificationType) return null;
 
   return (
@@ -63,9 +65,13 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
           </div>
         )}
       </CardHeader>
-      <CardContent className="ml-2 flex-1 mt-2 p-4" >
+      <CardContent className="ml-2 flex-1 mt-2 p-4">
         <div className="flex justify-between items-center">
-          <p onClick={() => handleNotificationRead(notification.id as Id<"notifications">)}>
+          <p
+            onClick={() =>
+              handleNotificationRead(notification.id as Id<"notifications">)
+            }
+          >
             {notification.type === "share" && (
               <>
                 <Link
@@ -132,6 +138,17 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
                 >
                   comment
                 </Link>
+              </>
+            )}
+            {notification.type === "profile_view" && (
+              <>
+                <Link
+                  href={fromUserCommonDetails?.url || ""}
+                  className="text-blue-600 hover:underline"
+                >
+                  {fromUserCommonDetails?.name}
+                </Link>{" "}
+                viewed your profile.
               </>
             )}
           </p>

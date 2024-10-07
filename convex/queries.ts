@@ -25,6 +25,7 @@ import {
   getNotificationsForCurrentUser,
   readNotification,
   countUnreadNotificationsOfcurrentUser,
+  markAllNotificationsAsRead
 } from "./function/notification.function";
 
 import {
@@ -140,6 +141,7 @@ export {
   getNotificationsForCurrentUser,
   readNotification,
   countUnreadNotificationsOfcurrentUser,
+  markAllNotificationsAsRead,
   postJob,
   getJobByJobId,
   getAllActiveJobs,

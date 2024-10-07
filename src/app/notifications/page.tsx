@@ -2,7 +2,8 @@
 
 import { NotificationItem } from "./components/NotificationItem";
 import { api } from "../../../convex/_generated/api";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
+import { Button } from "@/components/ui/button";
 
 const NotificationPage = () => {
   // const mockNotifications: Notification[] = [
@@ -166,26 +167,40 @@ const NotificationPage = () => {
   // const [notifications, setNotifications] = useState(mockNotifications);
 
   const notifications = useQuery(api.queries.getNotificationsForCurrentUser);
+  const markAllNotificationsAsRead = useMutation(
+    api.queries.markAllNotificationsAsRead
+  );
 
   return (
-    <div>
-      {notifications && notifications.map((notification) => (
-        <NotificationItem
-          key={notification._id}
-          notification={
-            {
-              id: notification._id,
-              userId: notification.userId,
-              type: notification.type,
-              fromUser: notification.fromUserId,
-              reference: notification.referanceUrl,
-              metadata: { avatarUrl: "https://example.com/avatar3.png" },
-              createdAt: notification.createdAt,
-              isRead: notification.isRead,
-            }
-          }
-        />
-      ))}
+    <div className="flex-1">
+      <div className="flex items-end justify-end">
+        <Button
+          className="bg-blue-500 hover:bg-blue-600 hover:cursor-pointer"
+          onClick={() => {
+            markAllNotificationsAsRead();
+          }}
+        >
+          Make all as read
+        </Button>
+      </div>
+      <div className="mt-2">
+        {notifications &&
+          notifications.map((notification) => (
+            <NotificationItem
+              key={notification._id}
+              notification={{
+                id: notification._id,
+                userId: notification.userId,
+                type: notification.type,
+                fromUser: notification.fromUserId,
+                reference: notification.referanceUrl,
+                metadata: { avatarUrl: "https://example.com/avatar3.png" },
+                createdAt: notification.createdAt,
+                isRead: notification.isRead,
+              }}
+            />
+          ))}
+      </div>
     </div>
   );
 };
