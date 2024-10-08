@@ -21,6 +21,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
+import { FileSharingIconModal } from "./FileSharingIconsModal";
+import PdfUploadModal from "./PdfUploadModal";
 
 export const formatDateForWhatsApp = (dateString: string) => {
   const inputDate = new Date(dateString);
@@ -69,6 +71,18 @@ const MessageComponent = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFileSharingIconModalOpen, setIsFileSharingIconModalOpen] =
+    useState(false);
+  const [position, setPosition] = useState<{ left: number; top: number }>({
+    left: 0,
+    top: 0,
+  });
+
+  const [isUploadImageModalOpen, setIsUploadImageModalOpen] =
+    useState<boolean>(false);
+  const [isUploadPdfModalOpen, setIsUploadPdfModalOpen] =
+    useState<boolean>(false);
+
   const [files, setFiles] = useState<File[]>([]); // State to hold uploaded files
 
   // Logic to start build conversation
@@ -223,6 +237,36 @@ const MessageComponent = ({
             conversationId={conversationId}
           />
         )}
+
+        {isUploadImageModalOpen && (
+          <ImageUploadModal
+            isOpen={isUploadImageModalOpen}
+            onClose={setIsUploadImageModalOpen}
+            setFiles={setFiles} // Pass the setFiles state to the modal
+            files={files}
+            conversationId={conversationId}
+          />
+        )}
+
+        {isUploadPdfModalOpen && (
+          <PdfUploadModal
+            isOpen={isUploadPdfModalOpen}
+            onClose={setIsUploadPdfModalOpen}
+            setFiles={setFiles} // Pass the setFiles state to the modal
+            files={files}
+            conversationId={conversationId}
+          />
+        )}
+
+        {isFileSharingIconModalOpen && (
+          <FileSharingIconModal
+            isOpen={isFileSharingIconModalOpen}
+            onClose={setIsFileSharingIconModalOpen}
+            position={position}
+            setIsUploadImageModalOpen={setIsUploadImageModalOpen}
+            setIsUploadPdfModalOpen={setIsUploadPdfModalOpen}
+          />
+        )}
         {/* Message History */}
         <CardContent className="space-y-4 h-[65vh] overflow-y-auto p-4">
           {allMessages &&
@@ -272,7 +316,15 @@ const MessageComponent = ({
             />
             <AiOutlinePaperClip
               className="text-gray-500 w-6 h-6 cursor-pointer"
-              onClick={() => setIsModalOpen(true)}
+              onClick={(event: React.MouseEvent<SVGElement, MouseEvent>) => {
+                setPosition({
+                  left: event.clientX,
+                  top: event.clientY,
+                });
+                // setIsModalOpen(true)
+                setIsFileSharingIconModalOpen(true);
+                console.log({ position: position });
+              }}
             />
             <Input
               placeholder="Write a message..."
