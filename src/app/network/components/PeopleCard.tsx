@@ -29,6 +29,10 @@ export const PeopleCard = ({ people }: { people: PeopleInterface }) => {
     }
   );
 
+  const mutualConnections = useQuery(api.queries.getMutualConnections, {
+    userId: people.userId,
+  });
+
   const handleConnect = async () => {
     await sendConnectionRequest({
       connectionRequestReceiverUserId: people.userId,
@@ -60,7 +64,9 @@ export const PeopleCard = ({ people }: { people: PeopleInterface }) => {
 
       {/* Content Below Avatar */}
       <div className="mt-16 text-center">
-        <p className="font-medium text-lg hover:underline"><Link href={`/profile/${people.userId}`}>{people.name}</Link></p>
+        <p className="font-medium text-lg hover:underline">
+          <Link href={`/profile/${people.userId}`}>{people.name}</Link>
+        </p>
         <p className="text-sm text-gray-500">
           {people.bio && people.bio.length > 25
             ? `${people.bio.slice(0, 25)}...`
@@ -69,17 +75,26 @@ export const PeopleCard = ({ people }: { people: PeopleInterface }) => {
       </div>
 
       {/* Mutual Connections */}
-      <div className="mt-4 flex items-center justify-center space-x-2">
-        {/* Example mutual connection avatar */}
-        <Avatar>
-          <AvatarImage src="https://i.pravatar.cc/150?img=6" alt="Damini" />
-          <AvatarFallback>D</AvatarFallback>
-        </Avatar>
-        <p className="text-sm text-gray-500">
-          Damini and {0} other mutual connection
-          {2 > 1 ? "s" : ""}
-        </p>
-      </div>
+      {mutualConnections && (
+        <div className="mt-4 flex items-center justify-center space-x-2">
+          {/* Example mutual connection avatar */}
+          <Avatar>
+            <AvatarImage
+              src={mutualConnections?.avatar}
+              alt={mutualConnections?.name}
+            />
+            <AvatarFallback>
+              {mutualConnections.name?.toLocaleUpperCase().charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <p className="text-sm text-gray-500">
+            {mutualConnections.name} and{" "}
+            {mutualConnections?.totalMututalConnections - 1} other mutual
+            connection
+            {2 > 1 ? "s" : ""}
+          </p>
+        </div>
+      )}
 
       {/* Connect Button */}
       <Button

@@ -66,6 +66,7 @@ import {
   getStatusOfConnectionRequest,
   getAllConnectionRequests,
   acceptOrRejectConnectionRequest,
+  getMutualConnections
 } from "./function/network.function";
 
 import {
@@ -131,6 +132,8 @@ export {
   getStatusOfConnectionRequest,
   getAllConnectionRequests,
   acceptOrRejectConnectionRequest,
+  getMutualConnections,
+  
   getCommonDetails,
   getCommonDetailsByUserId,
   allProfileAndOrganizationProfile,

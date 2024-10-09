@@ -1,3 +1,5 @@
+import { ConnectionType } from "./../../types/network.interface";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { v } from "convex/values";
 import { mutation, query } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
@@ -177,5 +179,76 @@ export const acceptOrRejectConnectionRequest = mutation({
     await ctx.db.patch(args.connectionId, {
       status: args.status,
     });
+  },
+});
+
+export const getMutualConnections = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) {
+      throw new Error("Unauthorized Access!");
+    }
+
+    const myConnections = await ctx.db
+      .query("connection")
+      .filter((q) =>
+        q.and(
+          q.or(
+            q.eq(q.field("receiver"), userId),
+            q.eq(q.field("sender"), userId)
+          ),
+          q.eq(q.field("status"), "accepted")
+        )
+      )
+      .collect()
+      .then((connections: ConnectionType[]) => {
+        return connections.map((connection: ConnectionType) => {
+          return connection.receiver === userId
+            ? connection.sender
+            : connection.receiver;
+        });
+      });
+
+    const usersConnections = await ctx.db
+      .query("connection")
+      .filter((q) =>
+        q.and(
+          q.or(
+            q.eq(q.field("receiver"), args.userId),
+            q.eq(q.field("sender"), args.userId)
+          ),
+          q.eq(q.field("status"), "accepted")
+        )
+      )
+      .collect()
+      .then((connections: ConnectionType[]) => {
+        return connections.map((connection: ConnectionType) => {
+          return connection.receiver === args.userId
+            ? connection.sender
+            : connection.receiver;
+        });
+      });
+
+    const commonConnections = myConnections.filter((userId) =>
+      usersConnections.includes(userId)
+    );
+
+    if (commonConnections.length === 0) {
+      return undefined;
+    }
+
+    const firstCommonProfile = await ctx.db
+      .query("profile")
+      .filter((q) => q.eq(q.field("userId"), commonConnections[0]))
+      .first();
+
+    const result = {
+      avatar: firstCommonProfile?.profilePhoto,
+      name: firstCommonProfile?.name,
+      totalMututalConnections: commonConnections.length,
+    };
+    return result;
   },
 });
