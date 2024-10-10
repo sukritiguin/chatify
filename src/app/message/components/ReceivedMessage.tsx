@@ -1,12 +1,14 @@
-import { FaUserCircle } from "react-icons/fa";
+import { FaCloudDownloadAlt, FaEye, FaFilePdf, FaUserCircle } from "react-icons/fa";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { IoBanOutline } from "react-icons/io5";
 import { IMessage } from "../../../../types/message.interface";
 import { ImageGallery } from "./ImageGallery";
+import { handleDownload } from "./SentMessage";
+import { PDFViewer } from "./PDFViewer";
 
 export const convertToTime = (dateString: string): string => {
   const date = new Date(dateString); // Convert string to Date object
@@ -42,6 +44,9 @@ export const ReceivedMessage = ({
     name: string;
     avatar: string;
   } = { name: "", avatar: "" };
+
+  const [isPDFViewerDialogOpen, setIsPDFViewerDialogOpen] = useState(false);
+  const [pdfUrl, setPDFUrl] = useState("");
 
   const userRegistedAs = useQuery(api.queries.getUserRegistration);
   const currentUserId = useQuery(api.queries.currentUserId);
@@ -112,13 +117,49 @@ export const ReceivedMessage = ({
               content}
           </span>
         )}
-        {message.media && message.isDeleted === undefined && (
+        {message.media &&
+          !message.isDeleted &&
+          message.media.length > 0 &&
+          !message.media[0].endsWith(".pdf") && (
           <ImageGallery media={message.media} />
         )}
+
+        {message.media &&
+          message.media.length > 0 &&
+          message.isDeleted === undefined &&
+          message.media[0].endsWith(".pdf") &&
+          message.media.map((pdfFile) => {
+            return (
+              <div
+                className="flex my-2 bg-gray-100 p-2 rounded-2xl"
+                key={pdfFile}
+              >
+                <FaFilePdf className="text-3xl text-red-600" />
+                <FaEye
+                  className="text-3xl ml-2 text-blue-600 hover:cursor-pointer hover:text-blue-700"
+                  onClick={() => {
+                    setIsPDFViewerDialogOpen(true);
+                    setPDFUrl(pdfFile);
+                  }}
+                />
+                <FaCloudDownloadAlt
+                  className="text-3xl text-green-600 ml-2 hover:cursor-pointer"
+                  onClick={() => handleDownload(pdfFile)}
+                />
+              </div>
+            );
+          })}
         <span className="text-end text-gray-700 mb-0 text-xs">
           {convertToTime(createdAt)}
         </span>
       </div>
+      {isPDFViewerDialogOpen && (
+        <PDFViewer
+          isOpen={isPDFViewerDialogOpen}
+          setIsOpen={setIsPDFViewerDialogOpen}
+          pdfUrl={pdfUrl}
+        />
+      )}
     </div>
   );
 };

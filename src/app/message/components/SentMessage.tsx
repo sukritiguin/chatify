@@ -1,4 +1,4 @@
-import { FaUserCircle } from "react-icons/fa";
+import { FaCloudDownloadAlt, FaFilePdf, FaUserCircle } from "react-icons/fa";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useQuery } from "convex/react";
@@ -10,6 +10,19 @@ import { MessageDialog } from "./MessageDialog";
 import { IoBanOutline } from "react-icons/io5";
 import { IMessage } from "../../../../types/message.interface";
 import { ImageGallery } from "./ImageGallery";
+import { FaEye } from "react-icons/fa6";
+import { PDFViewer } from "./PDFViewer";
+
+export const handleDownload = (pdfUrl: string) => {
+  // Create an anchor element
+  const link = document.createElement("a");
+  link.href = pdfUrl;
+  link.target = "_blank"; // Open in a new tab (optional)
+  link.download = "your-file-name.pdf"; // Set a default file name for download
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link); // Clean up
+};
 
 export const SentMessage = ({
   message,
@@ -27,6 +40,8 @@ export const SentMessage = ({
   messageId: Id<"messages">;
 }) => {
   const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
+  const [isPDFViewerDialogOpen, setIsPDFViewerDialogOpen] = useState(false);
+  const [pdfUrl, setPDFUrl] = useState("");
 
   let userInfo: {
     name: string;
@@ -70,6 +85,8 @@ export const SentMessage = ({
     };
   }
 
+ 
+
   return (
     <div className="flex items-start space-x-2 justify-end">
       <div
@@ -91,9 +108,38 @@ export const SentMessage = ({
               content}
           </span>
         )}
-        {message.media && message.isDeleted === undefined && (
-          <ImageGallery media={message.media} />
-        )}
+        {message.media &&
+          !message.isDeleted &&
+          message.media.length > 0 &&
+          !message.media[0].endsWith(".pdf") && (
+            <ImageGallery media={message.media} />
+          )}
+
+        {message.media &&
+          message.media.length > 0 &&
+          message.isDeleted === undefined &&
+          message.media[0].endsWith(".pdf") &&
+          message.media.map((pdfFile) => {
+            return (
+              <div
+                className="flex my-2 bg-gray-100 p-2 rounded-2xl"
+                key={pdfFile}
+              >
+                <FaFilePdf className="text-3xl text-red-600" />
+                <FaEye
+                  className="text-3xl ml-2 text-blue-600 hover:cursor-pointer hover:text-blue-700"
+                  onClick={() => {
+                    setIsPDFViewerDialogOpen(true);
+                    setPDFUrl(pdfFile);
+                  }}
+                />
+                <FaCloudDownloadAlt
+                  className="text-3xl text-green-600 ml-2 hover:cursor-pointer"
+                  onClick={() => handleDownload(pdfFile)}
+                />
+              </div>
+            );
+          })}
 
         <div className="flex ml-auto">
           <span className="text-end text-gray-700 mb-0 text-xs">
@@ -123,6 +169,14 @@ export const SentMessage = ({
           isOpen={isMessageDialogOpen}
           setOpen={setIsMessageDialogOpen}
           messageId={messageId}
+        />
+      )}
+
+      {isPDFViewerDialogOpen && (
+        <PDFViewer
+          isOpen={isPDFViewerDialogOpen}
+          setIsOpen={setIsPDFViewerDialogOpen}
+          pdfUrl={pdfUrl}
         />
       )}
     </div>
